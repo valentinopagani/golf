@@ -67,9 +67,9 @@ function ModalEst({ torneo, jugadorDatos, canchas, setIsOpen, condicion }) {
 
 		for (let rondaIndex = 0; rondaIndex < numRondas; rondaIndex++) {
 			datasets.push({
-				label: `Par ${rondaIndex + 1}º Ronda`,
+				label: `${rondaIndex + 1}º Ronda | Par`,
 				data: labels.map((_, hoyoIndex) => scores[`ronda${rondaIndex + 1}_hoyo${hoyoIndex + 1}`] || 0),
-				backgroundColor: rondaIndex + 1 === 1 ? '#5589ff' : rondaIndex + 1 === 2 ? '#51e386' : rondaIndex + 1 === 3 ? '#73dada' : rondaIndex + 1 ? '#f37a7a' : 'black'
+				backgroundColor: rondaIndex + 1 === 1 ? '#3572ffff' : rondaIndex + 1 === 2 ? '#51e386' : rondaIndex + 1 === 3 ? '#73dada' : rondaIndex + 1 ? '#f37a7a' : 'black'
 			});
 		}
 
@@ -79,7 +79,7 @@ function ModalEst({ torneo, jugadorDatos, canchas, setIsOpen, condicion }) {
 				{
 					label: 'Par Hoyo',
 					data: labels.map((_, hoyoIndex) => datosCancha.hoyos[`hoyo_${hoyoIndex + 1}`].par),
-					backgroundColor: 'rgba(0, 0, 0, 0.4)'
+					backgroundColor: 'rgba(0, 0, 0, 0.3)'
 				},
 				...datasets
 			]

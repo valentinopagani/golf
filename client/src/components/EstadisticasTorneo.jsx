@@ -43,7 +43,23 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 				}
 			})
 			.filter((jugador) => jugador.scoreNeto !== null)
-			.sort((a, b) => a.scoreNeto - b.scoreNeto);
+			.sort((a, b) => {
+				if (torneo.rondas !== 1) return a.scoreNeto - b.scoreNeto;
+				else {
+					// 1) score
+					if (a.scoreNeto !== b.scoreNeto) return a.scoreNeto - b.scoreNeto;
+					// 2) vuelta
+					const aVuelta = a.scores?.['ronda1_vuelta'] ?? Infinity;
+					const bVuelta = b.scores?.['ronda1_vuelta'] ?? Infinity;
+					if (aVuelta !== bVuelta) return aVuelta - bVuelta;
+					// 3) 3 últimos hoyos
+					const hoyosTotales = datosCancha?.cant_hoyos ?? 18;
+					const ultimos3 = [hoyosTotales - 2, hoyosTotales - 1, hoyosTotales];
+					const sumaA = ultimos3.reduce((acc, h) => acc + (a.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
+					const sumaB = ultimos3.reduce((acc, h) => acc + (b.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
+					return sumaA - sumaB;
+				}
+			});
 
 		return { categoria, jugadoresCategoria };
 	});
