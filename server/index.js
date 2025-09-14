@@ -3,6 +3,7 @@ const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
 const { default: MercadoPagoConfig, Preference } = require('mercadopago');
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json()); // Permite recibir JSON en las peticiones
@@ -24,7 +25,7 @@ db.connect((err) => {
 });
 
 // MERCADO PAGO
-const client = new MercadoPagoConfig({ accessToken: 'APP_USR-2837454565417268-090321-14d98d3e3f8caa3e703760863ace90cc-2365070491' });
+const client = new MercadoPagoConfig({ accessToken: process.env.accessToken });
 
 app.post('/create_preference', async (req, res) => {
 	try {

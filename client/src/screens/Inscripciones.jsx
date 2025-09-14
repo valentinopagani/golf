@@ -13,7 +13,7 @@ function Inscripciones() {
 	const [formulario, setFormulario] = useState({});
 
 	useEffect(() => {
-		initMercadoPago('APP_USR-600ac2b9-515b-4fda-b368-a8c0ba293b63', {
+		initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY, {
 			locale: 'es-AR'
 		});
 
