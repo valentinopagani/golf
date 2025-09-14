@@ -70,19 +70,16 @@ function NavBarAdmin({ setTabs }) {
 							}}
 						>
 							<MenuItem onClick={() => setTabs(0)}>
-								<a className='nav_a' href='#nuevo_torneo'>
-									Añadir y Ver Torneos
-								</a>
+								<span className='nav_a'>Añadir y Ver Torneos</span>
 							</MenuItem>
 							<MenuItem onClick={() => setTabs(1)}>
-								<a className='nav_a' href='#torneos'>
-									Inscripciones
-								</a>
+								<span className='nav_a'>Inscripciones</span>
 							</MenuItem>
 							<MenuItem onClick={() => setTabs(2)}>
-								<a className='nav_a' href='#cancha'>
-									Tu Cancha
-								</a>
+								<span className='nav_a'>Tu Cancha</span>
+							</MenuItem>
+							<MenuItem onClick={() => setTabs(3)}>
+								<span className='nav_a'>Jugadores</span>
 							</MenuItem>
 						</Menu>
 					</Box>
@@ -103,6 +100,9 @@ function NavBarAdmin({ setTabs }) {
 						</span>
 						<span className='nav_a' onClick={() => setTabs(2)} sx={{ my: 2, display: 'block' }}>
 							Tu Cancha
+						</span>
+						<span className='nav_a' onClick={() => setTabs(3)} sx={{ my: 2, display: 'block' }}>
+							Jugadores
 						</span>
 					</Box>
 					<Box sx={{ flexGrow: 0 }}>

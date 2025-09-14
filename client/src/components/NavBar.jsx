@@ -13,7 +13,7 @@ import logo from '../components/logo.png';
 import { CgMenuLeft } from 'react-icons/cg';
 import { IoGolf } from 'react-icons/io5';
 
-const pages = ['Inicio', 'Resultados', 'Estadisticas Jugadores', 'Estadisticas Canchas'];
+const pages = ['inicio', 'resultados', 'estadisticas jugadores', 'estadisticas canchas'];
 
 function NavBar() {
 	const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -74,7 +74,7 @@ function NavBar() {
 						>
 							{pages.map((page) => (
 								<MenuItem key={page} onClick={handleCloseNavMenu}>
-									<NavLink className='nav_a' to={page === 'Inicio' ? '/' : page.replaceAll(' ', '')}>
+									<NavLink className='nav_a' to={page === 'inicio' ? '/' : page.replaceAll(' ', '')}>
 										{page}
 									</NavLink>
 								</MenuItem>
@@ -105,7 +105,7 @@ function NavBar() {
 						}}
 					>
 						{pages.map((page) => (
-							<NavLink key={page} activeclassName='active' className='nav_a' to={page === 'Inicio' ? '/' : page.replaceAll(' ', '')} onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
+							<NavLink key={page} activeclassName='active' className='nav_a' to={page === 'inicio' ? '/' : page.replaceAll(' ', '')} onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }}>
 								{page}
 							</NavLink>
 						))}

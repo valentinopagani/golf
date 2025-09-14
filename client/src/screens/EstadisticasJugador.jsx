@@ -55,7 +55,7 @@ function EstadisticasJugador() {
 								.map((jugador) => (
 									<Paper
 										key={jugador.id}
-										elevation={2}
+										elevation={3}
 										sx={{ padding: 2, cursor: 'pointer' }}
 										onClick={() => {
 											setJugadorPase(jugador);

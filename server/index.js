@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
+const { default: MercadoPagoConfig, Preference } = require('mercadopago');
 
 app.use(cors());
 app.use(express.json()); // Permite recibir JSON en las peticiones
@@ -19,6 +20,47 @@ db.connect((err) => {
 		console.error('Error al conectar:', err.message);
 	} else {
 		console.log('Conectado correctamente!');
+	}
+});
+
+// MERCADO PAGO
+const client = new MercadoPagoConfig({ accessToken: 'APP_USR-2837454565417268-090321-14d98d3e3f8caa3e703760863ace90cc-2365070491' });
+
+app.post('/create_preference', async (req, res) => {
+	try {
+		const preference = new Preference(client);
+		const result = await preference.create({
+			body: {
+				payment_methods: {
+					excluded_payment_methods: [{ id: 'cash' }, { id: 'amex' }, { id: 'argencard' }, { id: 'cabal' }, { id: 'cmr' }, { id: 'cencosud' }, { id: 'diners' }, { id: 'tarshop' }, { id: 'debcabal' }, { id: 'maestro' }],
+					installments: 1
+				},
+				items: [
+					{
+						title: req.body.title,
+						quantity: 1,
+						unit_price: req.body.price,
+						description: req.body.description,
+						currency_id: 'ARS',
+						category_id: 'sports'
+					}
+				],
+				back_urls: {
+					success: 'http://localhost:3000/inscripciones'
+				},
+				binary_mode: true,
+				statement_descriptor: 'GolfPoint'
+			}
+		});
+
+		res.json({
+			id: result.id // si falla borrar .id
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			error: 'error al crear preferencia'
+		});
 	}
 });
 
@@ -144,10 +186,10 @@ app.post('/categorias', (req, res) => {
 
 // CARGAR TORNEO
 app.post('/torneos', (req, res) => {
-	const { nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, finalizado } = req.body;
-	db.query('INSERT INTO torneos ( nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, finalizado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, finalizado], (err, result) => {
+	const { nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, valor, finalizado } = req.body;
+	db.query('INSERT INTO torneos ( nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, valor, finalizado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, valor, finalizado], (err, result) => {
 		if (err) return res.status(500).json({ error: err.message });
-		res.json({ id: result.insertId, nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, finalizado });
+		res.json({ id: result.insertId, nombre, fech_ini, fech_fin, cancha, rondas, descripcion, clubVinculo, nombreClubVinculo, fech_alta, valor, finalizado });
 	});
 });
 app.post('/categorias_torneo', (req, res) => {
@@ -193,9 +235,9 @@ app.delete('/torneos/:id', (req, res) => {
 // EDITAR TORNEO JUNTO CON SUS CATEGORIAS
 app.put('/torneos/:id', (req, res) => {
 	const torneoId = req.params.id;
-	const { nombre, fech_ini, fech_fin, cancha, rondas, descripcion, editado, categorias } = req.body;
+	const { nombre, fech_ini, fech_fin, cancha, rondas, descripcion, valor, editado, categorias } = req.body;
 
-	db.query('UPDATE torneos SET nombre=?, fech_ini=?, fech_fin=?, cancha=?, rondas=?, descripcion=?, editado=? WHERE id=?', [nombre, fech_ini, fech_fin, cancha, rondas, descripcion, editado, torneoId], (err) => {
+	db.query('UPDATE torneos SET nombre=?, fech_ini=?, fech_fin=?, cancha=?, rondas=?, descripcion=?, valor=?, editado=? WHERE id=?', [nombre, fech_ini, fech_fin, cancha, rondas, descripcion, valor, editado, torneoId], (err) => {
 		if (err) return res.status(500).json({ error: err.message });
 		// Eliminar categorías anteriores
 		db.query('DELETE FROM categorias_torneo WHERE torneo_id=?', [torneoId], (err) => {
@@ -230,6 +272,17 @@ app.post('/jugadores', (req, res) => {
 	});
 });
 
+// EDITAR JUGADOR
+app.put('/jugadores/:id', (req, res) => {
+	const { nombre, dni, fech_nac, sexo } = req.body;
+	const { id } = req.params;
+	const sql = 'UPDATE jugadores SET nombre = ?, dni = ?, fech_nac = ?, sexo = ? WHERE id = ?';
+	db.query(sql, [nombre, dni, fech_nac, sexo, id], (err, result) => {
+		if (err) return res.status(500).json({ error: err.message });
+		res.json({ success: true });
+	});
+});
+
 // CARGAR INSCRIPCION
 app.post('/inscriptos', (req, res) => {
 	const { dni, nombre, torneo, categoria, handicap, clubReg, clubSocio, fech_alta } = req.body;
@@ -243,6 +296,18 @@ app.post('/inscriptos', (req, res) => {
 app.put('/inscriptos/score', (req, res) => {
 	const { id, scores, totalScore } = req.body;
 	db.query('UPDATE inscriptos SET scores = ?, totalScore = ? WHERE id = ?', [JSON.stringify(scores), totalScore, id], (err, result) => {
+		if (err) return res.status(500).json({ error: err.message });
+		res.json({ success: true });
+	});
+});
+
+// EDITAR PUNTOS
+app.put('/inscriptos/score', (req, res) => {
+	const { id, scores, totalScore } = req.body;
+	const scoresStr = JSON.stringify(scores);
+
+	const sql = 'UPDATE inscriptos SET scores = ?, totalScore = ? WHERE id = ?';
+	db.query(sql, [scoresStr, totalScore, id], (err, result) => {
 		if (err) return res.status(500).json({ error: err.message });
 		res.json({ success: true });
 	});

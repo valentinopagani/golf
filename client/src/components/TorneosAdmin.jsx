@@ -54,6 +54,7 @@ function TorneosAdmin({ torneo, club, setTorneos }) {
 			<Typography sx={{ fontSize: 15 }}>
 				<b>Descripcion:</b> {torneo.descripcion}
 			</Typography>
+			{torneo.valor && <Typography sx={{ fontSize: 16, fontWeight: 'bold' }}>Valor inscripción: ${torneo.valor}</Typography>}
 			<Button sx={{ p: 0, fontWeight: 'bold', mr: 2 }} color='error' onClick={eliminarTorneo} title='Eliminar de forma permanente'>
 				Eliminar
 			</Button>

@@ -10,6 +10,7 @@ const Home = lazy(() => import('./Home'));
 const Resultados = lazy(() => import('./Resultados'));
 const EstadisticasJugador = lazy(() => import('./EstadisticasJugador'));
 const EstadisticasCancha = lazy(() => import('./EstadisticasCancha'));
+const Inscripciones = lazy(() => import('./Inscripciones'));
 
 function UserView() {
 	return (
@@ -20,10 +21,11 @@ function UserView() {
 					<NavBar />
 					<Routes>
 						<Route exact path='/' element={<Home />} />
-						<Route exact path='/Login' element={<Login />} />
-						<Route exact path='/Resultados' element={<Resultados />} />
-						<Route exact path='/EstadisticasJugadores' element={<EstadisticasJugador />} />
-						<Route exact path='/EstadisticasCanchas' element={<EstadisticasCancha />} />
+						<Route exact path='/login' element={<Login />} />
+						<Route exact path='/resultados' element={<Resultados />} />
+						<Route exact path='/estadisticasjugadores' element={<EstadisticasJugador />} />
+						<Route exact path='/estadisticascanchas' element={<EstadisticasCancha />} />
+						<Route exact path='/inscripciones' element={<Inscripciones />} />
 						<Route
 							path='/*'
 							element={
@@ -32,7 +34,7 @@ function UserView() {
 									<span>Comprueba que la ruta de dirección sea la correcta...</span>
 									<img src={draw} alt='draw' width={150} />
 									<Link to='/' style={{ color: 'blue', fontSize: 25 }}>
-										Ir a GolfClub's
+										Ir a GolfPoint
 									</Link>
 								</div>
 							}

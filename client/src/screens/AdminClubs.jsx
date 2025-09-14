@@ -6,6 +6,7 @@ import Canchas from '../components/Canchas';
 import TorneosAdmin from '../components/TorneosAdmin';
 import JugadoresTorneo from '../components/JugadoresTorneo';
 import EstadisticasTorneo from '../components/EstadisticasTorneo';
+import JugadoresAdm from '../components/JugadoresAdm';
 import { FaPencil } from 'react-icons/fa6';
 import CategoryStatsChart from '../components/CategoryStatsChart';
 import axios from 'axios';
@@ -30,6 +31,8 @@ function AdminClubs({ user }) {
 	const [categoryStats, setCategoryStats] = useState({ labels: [], values: [] });
 	const [fechaMin, setFechaMin] = useState('Todas');
 	const [fechaMax, setFechaMax] = useState('Todas');
+	const [insc, setInsc] = useState(false);
+	const [inscEdit, setInscEdit] = useState(false);
 
 	const userId = user.displayName.toLowerCase().replaceAll(' ', '');
 
@@ -106,6 +109,7 @@ function AdminClubs({ user }) {
 		setDatosEdit(torneo);
 		setClubEdit(club);
 		setSelectedCategorias(torneo.categorias.map((cat) => cat.nombre));
+		setInscEdit(torneo.valor !== null ? true : false);
 		setEditModal(true);
 	};
 
@@ -228,10 +232,14 @@ function AdminClubs({ user }) {
 										<div>
 											<Paper sx={{ p: 2 }} elevation={4} className='paper_newtorneo'>
 												<h3>+ Agregar nuevo Torneo</h3>
+												<hr />
 												<form
 													autoComplete='off'
 													onSubmit={async (e) => {
 														e.preventDefault();
+														if (selectedCategorias.length === 0) {
+															return alert('Selecciona al menos una categoría');
+														}
 														const fechaInicio = e.target.fech_ini.value.split('-');
 														const fechaFin = e.target.fech_fin.value.split('-');
 														const nombre = e.target.nombre_tor.value;
@@ -244,6 +252,7 @@ function AdminClubs({ user }) {
 														const clubVinculo = club.id;
 														const nombreClubVinculo = club.nombre;
 														const fech_alta = new Date().toLocaleDateString();
+														const valor = insc ? e.target.valor.value : null;
 														const finalizado = 0;
 														try {
 															const response = await axios.post('http://localhost:3001/torneos', {
@@ -256,6 +265,7 @@ function AdminClubs({ user }) {
 																clubVinculo,
 																nombreClubVinculo,
 																fech_alta,
+																valor,
 																finalizado
 															});
 															const torneoId = response.data.id;
@@ -296,10 +306,7 @@ function AdminClubs({ user }) {
 													</div>
 													<div>
 														<label>Cancha:</label>
-														<select id='cancha_juego'>
-															<option selected disabled>
-																Selecciona una chancha
-															</option>
+														<select id='cancha_juego' required>
 															{canchas
 																.filter((cancha) => cancha.clubVinculo === club.id)
 																.map((cancha) => (
@@ -332,6 +339,23 @@ function AdminClubs({ user }) {
 														</FormGroup>
 													</div>
 													<textarea id='descripcion_tor' placeholder='Añade una descripcion:' />
+
+													<h3>+ Inscripciones Web</h3>
+													<hr />
+													<div>
+														<label>Permitir inscripciones web:</label>
+														<select onChange={(e) => setInsc(!insc)}>
+															<option value={false}>No</option>
+															<option value={true}>Sí</option>
+														</select>
+													</div>
+													{insc && (
+														<div>
+															<label>Valor de inscripción:</label>
+															<input type='number' id='valor' min={1000} placeholder='$' required />
+														</div>
+													)}
+
 													<button type='submit' title='Nuevo torneo en el club'>
 														Agregar Torneo
 													</button>
@@ -437,6 +461,14 @@ function AdminClubs({ user }) {
 									<Canchas canchas={canchas} setCanchas={setCanchas} club={club} />
 								</div>
 							)}
+
+							{tabs === 3 && (
+								<div>
+									<h3 style={{ textAlign: 'center', fontStyle: 'italic' }}>{club.nombre}</h3>
+									<h2>MODIFICÁ LOS DATOS DE TUS JUGADORES</h2>
+									<JugadoresAdm />
+								</div>
+							)}
 						</div>
 					))}
 			</div>
@@ -447,12 +479,15 @@ function AdminClubs({ user }) {
 				<div className='modal'>
 					<Paper elevation={2} className='paper_editorneo'>
 						<h3>
-							Editar Torneo "<i>{datosEdit.nombre}</i>"
+							Editar: <i>{datosEdit.nombre}</i>
 						</h3>
 						<form
 							autoComplete='off'
 							onSubmit={async (e) => {
 								e.preventDefault();
+								if (selectedCategorias.length === 0) {
+									return alert('Selecciona al menos una categoría');
+								}
 								const fechaInicio = e.target.fech_ini.value.split('-');
 								const fechaFin = e.target.fech_fin.value.split('-');
 								const nombre = e.target.nombre_tor.value;
@@ -463,6 +498,7 @@ function AdminClubs({ user }) {
 								const categorias = selectedCategorias;
 								const descripcion = e.target.descripcion_tor.value;
 								const editado = new Date().toLocaleDateString();
+								const valor = inscEdit ? e.target.valor.value : null;
 								try {
 									await axios.put(`http://localhost:3001/torneos/${datosEdit.id}`, {
 										nombre,
@@ -471,6 +507,7 @@ function AdminClubs({ user }) {
 										cancha,
 										rondas,
 										descripcion,
+										valor,
 										editado
 									});
 									// Eliminar categorías_torneo asociadas
@@ -493,6 +530,7 @@ function AdminClubs({ user }) {
 									setFechIni('');
 									setFechFin('');
 									setSelectedCategorias([]);
+									setInscEdit(false);
 									setEditModal(false);
 								} catch (error) {
 									alert('Algo ha salido mal');
@@ -557,6 +595,19 @@ function AdminClubs({ user }) {
 								</FormGroup>
 							</div>
 							<textarea id='descripcion_tor' placeholder='Añade una descripcion:' defaultValue={datosEdit.descripcion} />
+							<div>
+								<label>Permitir inscripciones web:</label>
+								<select onChange={() => setInscEdit(!inscEdit)} defaultValue={inscEdit}>
+									<option value={false}>No</option>
+									<option value={true}>Sí</option>
+								</select>
+							</div>
+							{inscEdit && (
+								<div>
+									<label>Valor de inscripción:</label>
+									<input type='number' id='valor' min={1000} placeholder='$' required defaultValue={datosEdit.valor} />
+								</div>
+							)}
 							<div className='edit_bts'>
 								<button onClick={() => setEditModal(false)} title='Cerrar Editor' className='cerrar_edit'>
 									Cancelar

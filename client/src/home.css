@@ -212,10 +212,57 @@
 	color: #37cc9a;
 }
 
-.guia_colores {
-	width: 300px;
-	height: 35px;
-	opacity: 70%;
+.torneos_ins {
+	padding: 10px 80px;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap
+}
+
+.modal_cont_ins {
+	max-width: 95%;
+	max-height: 82vh;
+	padding: 10px 20px;
+	border-radius: 12px;
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.modal_cont_ins h3 {
+	font-size: 25px;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.modal_cont_ins_contain {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+}
+
+.modal_cont_ins_contain div {
+	max-width: 400px;
+}
+
+.modal_cont_ins form label {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.modal_cont_ins form label input {
+	flex: 1;
+	margin-left: 8px;
+	box-sizing: border-box;
+}
+
+.modal_cont_ins_contain span {
+	display: block;
 }
 
 footer {

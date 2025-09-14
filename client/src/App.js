@@ -3,9 +3,8 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import './App.css';
 import './adminclub.css';
 import './home.css';
-import './firebase/firebase'; // Import the Firebase configuration
+import './firebase/firebase';
 
-// Lazy load the components
 const AdminView = lazy(() => import('./screens/AdminView'));
 const UserView = lazy(() => import('./screens/UserView'));
 
@@ -19,7 +18,6 @@ function App() {
 			setUser(user);
 		});
 
-		// Cleanup subscription on unmount
 		return () => unsubscribe();
 	}, []);
 
@@ -31,13 +29,10 @@ function App() {
 			}
 		};
 
-		// Check if styles are already loaded
 		checkStylesLoaded();
 
-		// Add an event listener to check when styles are loaded
 		document.addEventListener('readystatechange', checkStylesLoaded);
 
-		// Cleanup event listener on unmount
 		return () => {
 			document.removeEventListener('readystatechange', checkStylesLoaded);
 		};

@@ -42,12 +42,12 @@ function Home() {
 			<div className='banner_home'>
 				<div>
 					<h1>
-						Golf<b>Club's</b>
+						Golf<b>Point</b>
 						<GiGolfFlag size={40} />
 					</h1>
 					<p>Precisión e información para un juego perfecto...</p>
-					<a href='mailto:paganivalentino06@gmail.com'>Asosiate a Nosotros</a>
-					<Link to='/Resultados'>Ver Resultados</Link>
+					<Link to='/inscripciones'>Inscripciones</Link>
+					<Link to='/resultados'>Ver Resultados</Link>
 				</div>
 				<img src={logo} alt='' />
 			</div>
@@ -56,12 +56,12 @@ function Home() {
 
 			<div className='body_home'>
 				<div className='desc_home'>
-					<h3>Descubre GolfClub's: Tu Compañero Ideal para el Mundo del Golf</h3>
+					<h3>Descubre GolfPoint: Tu Compañero Ideal para el Mundo del Golf</h3>
 					<p>
 						¿Eres un apasionado del golf y buscas una manera eficiente de gestionar tus actividades y eventos?
 						<br />
-						¡GolfClub's es la solución perfecta para ti! <br />
-						GolfClub's es más que una simple aplicación, es tu compañero ideal en el mundo del golf. Con nuestra gestión integral de clubes y torneos, interfaz simple, facilidad de registros y su lectura, actualizaciones en tiempo real, y muco más... Ofrecemos todo lo que necesitas para disfrutar al máximo de tu pasión por el golf y llevar tu club hacia lo mejor.
+						¡GolfPoint es la solución perfecta para ti! <br />
+						GolfPoint es más que una simple aplicación, es tu compañero ideal en el mundo del golf. Con nuestra gestión integral de clubes y torneos, interfaz simple, facilidad de registros y su lectura, actualizaciones en tiempo real, y muco más... Ofrecemos todo lo que necesitas para disfrutar al máximo de tu pasión por el golf y llevar tu club hacia lo mejor.
 						<br />
 						¡UNITE A NUESTRA HERMOSA FAMILIA!
 					</p>

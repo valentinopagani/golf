@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import Modal from './Modal';
+import ModalEdit from './ModalEdit';
 import axios from 'axios';
+import { MdEdit } from 'react-icons/md';
+import { FaTrash } from 'react-icons/fa';
 
 function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 	const [jugadores, setJugadores] = useState([]);
@@ -12,6 +15,7 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 	const [filteredTorneo, setFilteredTorneo] = useState(null);
 	const [registrado, setRegistrado] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
+	const [isOpenEdit, setIsOpenEdit] = useState(false);
 	const [jugadorDatos, setJugadorDatos] = useState([]);
 	const [torneoDatos, setTorneoDatos] = useState([]);
 	const [filterCategoria, setFilterCategoria] = useState({});
@@ -235,7 +239,8 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 													<th>Club Asociado</th>
 													<th>Fecha Inscripcion</th>
 													<th>Scores</th>
-													<th></th>
+													<th />
+													<th />
 												</tr>
 											</thead>
 											<tbody>
@@ -264,11 +269,22 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 																	</span>
 																)}
 															</td>
+															<td
+																onClick={() => {
+																	setJugadorDatos(jugador);
+																	setTorneoDatos(torneo);
+																	setIsOpenEdit(true);
+																}}
+																className='pointer'
+															>
+																<MdEdit size={20} />
+															</td>
 															<td>
-																<span
+																<FaTrash
 																	className='pointer'
+																	title='Eliminar'
 																	onClick={async () => {
-																		if (!window.confirm('¿Seguro que deseas eliminar este jugador?')) return;
+																		if (!window.confirm(`¿Seguro que deseas eliminar a ${jugador.nombre}?`)) return;
 																		try {
 																			await axios.delete(`http://localhost:3001/inscriptos/${jugador.id}`);
 																			await axios
@@ -280,9 +296,7 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 																			console.error(error);
 																		}
 																	}}
-																>
-																	🗑️
-																</span>
+																/>
 															</td>
 														</tr>
 													))}
@@ -294,6 +308,7 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 					);
 				})}
 				{isOpen && <Modal torneoDatos={torneoDatos} jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} setIsOpen={setIsOpen} />}
+				{isOpenEdit && <ModalEdit jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} setIsOpen={setIsOpenEdit} />}
 			</div>
 		</div>
 	);
