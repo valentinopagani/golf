@@ -10,13 +10,13 @@ const ModalEst = lazy(() => import('./ModalEst'));
 const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaSelect, jugadores, setModal, user }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [jugadorDatos, setJugadorDatos] = useState([]);
-	const [canchas, setCanchas] = useState([]);
+	const [datosCancha, setDatosCancha] = useState([]);
 	const [selectedCategoria, setSelectedCategoria] = useState(categoriaSelect || 'Todas');
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/canchas')
-			.then((response) => setCanchas(response.data))
+			.get(`http://localhost:3001/canchas?idCancha=${torneo.cancha}`)
+			.then((response) => setDatosCancha(response.data[0]))
 			.catch((error) => console.error(error));
 	}, []);
 
@@ -24,8 +24,6 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 		await setJugadorDatos(jugador);
 		setIsOpen(true);
 	}
-
-	const datosCancha = canchas.find((cancha) => cancha.id === torneo.cancha);
 
 	const jugadoresFiltrados = torneo.categorias.map((categoria) => {
 		const nombreCategoria = categoria.nombre;
@@ -210,7 +208,7 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 					<IoCloseCircleSharp fontSize='40' />
 				</IconButton>
 			</div>
-			{isOpen && <ModalEst torneo={torneo} jugadorDatos={jugadorDatos} canchas={canchas} setIsOpen={setIsOpen} />}
+			{isOpen && <ModalEst torneo={torneo} jugadorDatos={jugadorDatos} canchas={datosCancha} setIsOpen={setIsOpen} />}
 		</div>
 	);
 });

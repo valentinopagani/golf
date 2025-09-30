@@ -1,17 +1,20 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import EstadisticasTorneo from './EstadisticasTorneo';
+import axios from 'axios';
 
-function TorneosResultados({ torneo, jugadoresInit }) {
+function TorneosResultados({ torneo }) {
 	const [jugadores, setJugadores] = useState([]);
 	const [torneoPass, setTorneoPass] = useState([]);
 	const [modal, setModal] = useState(false);
 	const [categoriaSelect, setCategoriaSelect] = useState('Todas');
 
 	useEffect(() => {
-		const filteredJugadores = jugadoresInit.filter((jugador) => jugador.torneo === torneo.id);
-		setJugadores(filteredJugadores);
-	}, [jugadoresInit, torneo.id]);
+		axios
+			.get(`http://localhost:3001/inscriptos?torneo=${torneo.id}`)
+			.then((response) => setJugadores(response.data))
+			.catch((error) => console.error(error));
+	}, []);
 
 	const getScore = (jugador, categoria) => {
 		if (categoria.nombre.toLowerCase().includes('gross') || categoria.nombre.toLowerCase().includes('scratch')) {

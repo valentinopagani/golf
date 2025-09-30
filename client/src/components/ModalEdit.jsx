@@ -2,7 +2,7 @@ import { Button, Stack } from '@mui/material';
 import { useState } from 'react';
 import axios from 'axios';
 
-function ModalEdit({ jugadorDatos, setJugadoresTorneo, setIsOpen }) {
+function ModalEdit({ jugadorDatos, setJugadoresTorneo, idsTorneosAdmin, setIsOpen }) {
 	const [scores, setScores] = useState({ ...jugadorDatos.scores });
 
 	const handleInputChange = (e, key) => {
@@ -57,9 +57,9 @@ function ModalEdit({ jugadorDatos, setJugadoresTorneo, setIsOpen }) {
 				scores: updatedScores,
 				totalScore
 			});
-			const response = await axios.get('http://localhost:3001/inscriptos');
-			setIsOpen(false);
+			const response = await axios.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`);
 			setJugadoresTorneo(response.data);
+			setIsOpen(false);
 		} catch (error) {
 			console.error('Error al actualizar scores', error);
 			alert('Error al actualizar scores', error);

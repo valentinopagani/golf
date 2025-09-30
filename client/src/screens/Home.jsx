@@ -18,7 +18,7 @@ function Home() {
 			.catch((error) => console.error(error));
 
 		axios
-			.get('http://localhost:3001/torneos')
+			.get('http://localhost:3001/torneos?tipo=proximos')
 			.then((response) => setTorneos(response.data))
 			.catch((error) => console.error(error));
 	}, []);
@@ -35,7 +35,7 @@ function Home() {
 	const year = date.getFullYear();
 	const actualDate = year + '/' + month + '/' + day;
 
-	const filteredTorneos = torneos.filter((torneo) => torneo.fech_ini.split('/').reverse().join('/') >= actualDate).sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
+	// const filteredTorneos = torneos.filter((torneo) => torneo.fech_ini.split('/').reverse().join('/') >= actualDate).sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
 
 	return (
 		<div>
@@ -71,7 +71,7 @@ function Home() {
 				<div id='clubes_home'>
 					<div className='clubes_banner_home'>
 						<div className='torneos_home'>
-							{filteredTorneos.length === 0 ? (
+							{torneos.length === 0 ? (
 								<Paper sx={{ m: 2, border: '1px solid #aad4b4' }} elevation={3} className='paper'>
 									<Box sx={{ p: '10px', textAlign: 'center' }}>
 										<Typography variant='h6' sx={{ fontWeight: 'bold' }}>
@@ -80,14 +80,16 @@ function Home() {
 									</Box>
 								</Paper>
 							) : (
-								filteredTorneos.map((torneo) => {
-									const club = clubes.find((club) => club.id === torneo.clubVinculo);
-									return (
-										<div key={torneo.id}>
-											<TorneosHome torneo={torneo} club={club} />
-										</div>
-									);
-								})
+								torneos
+									// .sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())))
+									.map((torneo) => {
+										const club = clubes.find((club) => club.id === torneo.clubVinculo);
+										return (
+											<div key={torneo.id}>
+												<TorneosHome torneo={torneo} club={club} />
+											</div>
+										);
+									})
 							)}
 						</div>
 					</div>

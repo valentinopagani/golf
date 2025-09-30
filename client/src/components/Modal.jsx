@@ -3,7 +3,7 @@ import { Button, IconButton, Typography } from '@mui/material';
 import { IoCloseCircleSharp } from 'react-icons/io5';
 import axios from 'axios';
 
-function Modal({ torneoDatos, jugadorDatos, setJugadoresTorneo, setIsOpen }) {
+function Modal({ torneoDatos, jugadorDatos, setJugadoresTorneo, idsTorneosAdmin, setIsOpen }) {
 	const [scores, setScores] = useState({});
 	const [canchas, setCanchas] = useState([]);
 
@@ -68,7 +68,7 @@ function Modal({ torneoDatos, jugadorDatos, setJugadoresTorneo, setIsOpen }) {
 			setScores({});
 			setIsOpen(false);
 			await axios
-				.get('http://localhost:3001/inscriptos')
+				.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
 				.then((response) => setJugadoresTorneo(response.data))
 				.catch((error) => console.error(error));
 		} catch (error) {

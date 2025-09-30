@@ -11,9 +11,10 @@ import firebaseApp from '../firebase/firebase';
 import { getAuth, signOut } from 'firebase/auth';
 import Typography from '@mui/material/Typography';
 import { TbGolfOff } from 'react-icons/tb';
+import { Link } from 'react-router-dom';
 const auth = getAuth(firebaseApp);
 
-function NavBarAdmin({ setTabs }) {
+function NavBarAdmin() {
 	const [anchorElNav, setAnchorElNav] = useState(null);
 
 	const handleOpenNavMenu = (event) => {
@@ -69,16 +70,16 @@ function NavBarAdmin({ setTabs }) {
 								}
 							}}
 						>
-							<MenuItem onClick={() => setTabs(0)}>
+							<MenuItem>
 								<span className='nav_a'>Añadir y Ver Torneos</span>
 							</MenuItem>
-							<MenuItem onClick={() => setTabs(1)}>
+							<MenuItem>
 								<span className='nav_a'>Inscripciones</span>
 							</MenuItem>
-							<MenuItem onClick={() => setTabs(2)}>
+							<MenuItem>
 								<span className='nav_a'>Tu Cancha</span>
 							</MenuItem>
-							<MenuItem onClick={() => setTabs(3)}>
+							<MenuItem>
 								<span className='nav_a'>Jugadores</span>
 							</MenuItem>
 						</Menu>
@@ -92,18 +93,18 @@ function NavBarAdmin({ setTabs }) {
 							}
 						}}
 					>
-						<span className='nav_a' onClick={() => setTabs(0)} sx={{ my: 2, display: 'block' }}>
+						<Link to='/administrador' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Añadir y Ver Torneos
-						</span>
-						<span className='nav_a' onClick={() => setTabs(1)} sx={{ my: 2, display: 'block' }}>
+						</Link>
+						<Link to='/administrador/inscripciones' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Inscripciones
-						</span>
-						<span className='nav_a' onClick={() => setTabs(2)} sx={{ my: 2, display: 'block' }}>
+						</Link>
+						<Link to='/administrador' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Tu Cancha
-						</span>
-						<span className='nav_a' onClick={() => setTabs(3)} sx={{ my: 2, display: 'block' }}>
+						</Link>
+						<Link to='/' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Jugadores
-						</span>
+						</Link>
 					</Box>
 					<Box sx={{ flexGrow: 0 }}>
 						<IconButton onClick={() => signOut(auth)} title='Cerrar Sesion'>

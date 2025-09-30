@@ -12,7 +12,7 @@ const Historial = lazy(() => import('./Historial'));
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 function ModalEst({ torneo, jugadorDatos, canchas, setIsOpen, condicion }) {
-	const datosCancha = useMemo(() => canchas.find((cancha) => cancha.id === torneo.cancha), [canchas, torneo.cancha]);
+	const datosCancha = Array.isArray(canchas) ? canchas.find((cancha) => cancha.id === torneo.cancha) : canchas;
 	const scores = useMemo(() => jugadorDatos.scores || {}, [jugadorDatos.scores]);
 	const numRondas = torneo.rondas;
 	const numHoyos = datosCancha ? datosCancha.cant_hoyos : 18;

@@ -222,8 +222,8 @@
 }
 
 .modal_cont_ins {
-	max-width: 95%;
-	max-height: 82vh;
+	max-width: 85%;
+	max-height: 83vh;
 	padding: 10px 20px;
 	border-radius: 12px;
 	background-color: white;
@@ -246,7 +246,7 @@
 }
 
 .modal_cont_ins_contain div {
-	max-width: 400px;
+	max-width: 420px;
 }
 
 .modal_cont_ins form label {

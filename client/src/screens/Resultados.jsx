@@ -1,15 +1,15 @@
-import { useEffect, useState, lazy, Suspense, memo, useMemo } from 'react';
-import { Button, CircularProgress, Paper } from '@mui/material';
-import { subMonths, parse, compareAsc } from 'date-fns';
+import { useEffect, useState, lazy, memo } from 'react';
+import { Button, Paper } from '@mui/material';
+import { parse, compareDesc } from 'date-fns';
 import axios from 'axios';
 import EstadisticasTorneo from '../components/EstadisticasTorneo';
 
 const TorneosResultados = lazy(() => import('../components/TorneosResultados'));
 
 const Resultados = memo(function Resultados() {
+	const [torneosShow, setTorneosShow] = useState([]);
 	const [torneos, setTorneos] = useState([]);
 	const [inscriptos, setInscriptos] = useState([]);
-	const [loading, setLoading] = useState(true);
 	const [filtro, setFiltro] = useState('');
 	const [bandera, setBandera] = useState(false);
 	const [torneoPass, setTorneoPass] = useState([]);
@@ -17,28 +17,22 @@ const Resultados = memo(function Resultados() {
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/torneos')
-			.then((response) => setTorneos(response.data))
+			.get('http://localhost:3001/torneos?tipo=dosmeses')
+			.then((response) => setTorneosShow(response.data))
 			.catch((error) => console.error(error));
 
 		axios
 			.get('http://localhost:3001/inscriptos')
 			.then((response) => setInscriptos(response.data))
 			.catch((error) => console.error(error));
-
-		const timer = setTimeout(() => {
-			setLoading(false);
-		}, 2000);
-
-		return () => clearTimeout(timer);
 	}, []);
 
-	const actualDate = new Date();
-	const twoMonthsAgo = subMonths(actualDate, 2);
-
-	const filteredTorneos = useMemo(() => {
-		return torneos.filter((torneo) => torneo.finalizado === 1 && parse(torneo.fech_ini, 'dd/MM/yyyy', new Date()) >= twoMonthsAgo).sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
-	}, [torneos, twoMonthsAgo]);
+	useEffect(() => {
+		axios
+			.get(`http://localhost:3001/torneos?nombre=${filtro}`)
+			.then((response) => setTorneos(response.data))
+			.catch((error) => console.error(error));
+	}, [filtro]);
 
 	const handleTorneoClick = async (torneo) => {
 		await setTorneoPass(torneo);
@@ -51,25 +45,19 @@ const Resultados = memo(function Resultados() {
 				<div className='title_banner'>
 					<h2>Mirá los últimos torneos y sus resultados.</h2>
 				</div>
-				<Suspense>
-					<div className='clubes_banner_home'>
-						<div className='torneos_home'>
-							<Suspense>
-								{loading ? (
-									<CircularProgress />
-								) : (
-									filteredTorneos.map((torneo) => (
-										<div key={torneo.id}>
-											<div>
-												<TorneosResultados sx={{ m: 0 }} torneo={torneo} jugadoresInit={inscriptos} />
-											</div>
-										</div>
-									))
-								)}
-							</Suspense>
-						</div>
+				<div className='clubes_banner_home'>
+					<div className='torneos_home'>
+						{torneosShow
+							.sort((a, b) => compareDesc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())))
+							.map((torneo) => (
+								<div key={torneo.id}>
+									<div>
+										<TorneosResultados sx={{ m: 0 }} torneo={torneo} />
+									</div>
+								</div>
+							))}
 					</div>
-				</Suspense>
+				</div>
 
 				<div>
 					<h2>📅 Buscar Torneos:</h2>

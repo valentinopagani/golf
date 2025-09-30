@@ -12,10 +12,10 @@ function EstadisticasJugador() {
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/jugadores')
+			.get(`http://localhost:3001/jugadores?nombreDni=${filtro}`)
 			.then((response) => setJugadores(response.data))
 			.catch((error) => console.error(error));
-	}, []);
+	}, [filtro]);
 
 	return (
 		<div className='body_home'>
@@ -47,24 +47,22 @@ function EstadisticasJugador() {
 
 				<div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
 					{bandera &&
-						(jugadores.filter((jugador) => jugador.dni.toString().includes(filtro) || jugador.nombre.toLowerCase().includes(filtro)).length === 0 ? (
+						(jugadores.length === 0 ? (
 							<span>No se encontró resultados para {filtro}...</span>
 						) : (
-							jugadores
-								.filter((jugador) => jugador.dni.toString().includes(filtro) || jugador.nombre.toLowerCase().includes(filtro))
-								.map((jugador) => (
-									<Paper
-										key={jugador.id}
-										elevation={3}
-										sx={{ padding: 2, cursor: 'pointer' }}
-										onClick={() => {
-											setJugadorPase(jugador);
-											setIsOpen(true);
-										}}
-									>
-										{jugador.dni} - {jugador.nombre}
-									</Paper>
-								))
+							jugadores.map((jugador) => (
+								<Paper
+									key={jugador.id}
+									elevation={3}
+									sx={{ padding: 2, cursor: 'pointer' }}
+									onClick={() => {
+										setJugadorPase(jugador);
+										setIsOpen(true);
+									}}
+								>
+									{jugador.dni} - {jugador.nombre}
+								</Paper>
+							))
 						))}
 				</div>
 			</div>

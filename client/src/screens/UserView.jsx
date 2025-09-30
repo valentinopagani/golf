@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import draw from '../components/undraw_playing-golf_016o.svg';
 import logoProyInfo from '../components/LogoPapiGuille.png';
@@ -14,7 +14,7 @@ const Inscripciones = lazy(() => import('./Inscripciones'));
 
 function UserView() {
 	return (
-		<Router>
+		<div>
 			<ScrollToTop />
 			<div className='body'>
 				<Suspense fallback={<div className='loading'>Cargando...</div>}>
@@ -53,7 +53,7 @@ function UserView() {
 					<h3>ProyInfo | 2025</h3>
 				</div>
 			</footer>
-		</Router>
+		</div>
 	);
 }
 

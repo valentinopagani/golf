@@ -3,6 +3,7 @@ import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import { compareAsc, parse } from 'date-fns';
 import { Box, Button, Chip, IconButton, Paper, Stack, Typography } from '@mui/material';
 import { IoCloseCircleSharp } from 'react-icons/io5';
+import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
 function Inscripciones() {
@@ -11,6 +12,22 @@ function Inscripciones() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [torneoData, setTorneoData] = useState([]);
 	const [formulario, setFormulario] = useState({});
+	const [verificado, setVerificado] = useState(false);
+
+	const [status, setStatus] = useState(null);
+
+	useEffect(() => {
+		const query = new URLSearchParams(window.location.search);
+		if (query.get('status')) {
+			setStatus(query.get('status'));
+		}
+	}, []);
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors }
+	} = useForm();
 
 	useEffect(() => {
 		initMercadoPago(process.env.REACT_APP_MP_PUBLIC_KEY, {
@@ -18,33 +35,37 @@ function Inscripciones() {
 		});
 
 		axios
-			.get('http://localhost:3001/torneos')
+			.get('http://localhost:3001/torneos?tipo=inscripciones')
 			.then((response) => setTorneos(response.data))
 			.catch((error) => console.error(error));
 	}, []);
 
-	const date = new Date();
-	let day = date.getDate();
-	if (day < 10) {
-		day = '0' + day;
-	}
-	let month = date.getMonth() + 1;
-	if (month < 10) {
-		month = '0' + month;
-	}
-	const year = date.getFullYear();
-	const actualDate = year + '/' + month + '/' + day;
+	const filteredTorneos = torneos.sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
 
-	const filteredTorneos = torneos.filter((torneo) => torneo.fech_ini.split('/').reverse().join('/') >= actualDate && !torneo.finalizado && torneo.valor).sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
+	const openModal = (torneo) => {
+		setTorneoData(torneo);
+		setIsOpen(true);
+	};
+
+	const closeModal = () => {
+		setIsOpen(false);
+		setTorneoData([]);
+		setPreference(null);
+	};
+
+	const onSubmit = handleSubmit((data) => {
+		setFormulario(data);
+		setVerificado(true);
+	});
 
 	const createPreference = async (torneo) => {
 		try {
 			const response = await axios.post('http://localhost:3001/create_preference', {
 				title: `Inscripcion a ${torneo.nombre}`,
 				description: `El torneo se llevará a cabo en ${torneo.nombreClubVinculo}, inicia el ${torneo.fech_ini !== torneo.fech_fin ? torneo.fech_ini + ' al ' + torneo.fech_fin : torneo.fech_ini}`,
-				price: torneo.valor
+				price: torneo.valor,
+				formulario: formulario
 			});
-
 			const { id } = response.data;
 			return id;
 		} catch (error) {
@@ -59,22 +80,18 @@ function Inscripciones() {
 		}
 	};
 
-	const openModal = (torneo) => {
-		setTorneoData(torneo);
-		setIsOpen(true);
-	};
-
-	const closeModal = () => {
-		setIsOpen(false);
-		setTorneoData([]);
-		setPreference(null);
-	};
-
 	return (
 		<div className='body_home'>
 			<div className='title_banner'>
 				<h2>Apuntate en tu próximo torneo</h2>
 			</div>
+
+			{status && (
+				<center>
+					{status === 'success' && <span style={{ color: 'green', fontSize: 26, fontWeight: 'bolder' }}>¡Pago realizado con éxito!</span>}
+					{status === 'failure' && <span style={{ color: 'red', fontSize: 26, fontWeight: 'bolder' }}>¡Algo ha salido mal... Intentelo nuevamente!</span>}
+				</center>
+			)}
 
 			<div>
 				{filteredTorneos.map((torneo) => (
@@ -108,42 +125,72 @@ function Inscripciones() {
 						<h3>Formulario de Inscripción</h3>
 						<div className='modal_cont_ins_contain'>
 							<div>
-								<span>Datos del jugador:</span>
+								<span style={{ fontWeight: 800 }}>Datos del Torneo:</span>
 								<hr />
-								<form
-									style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '10px 0' }}
-									onSubmit={(e) => {
-										e.preventDefault();
-										const formData = new FormData(e.target);
-										const data = Object.fromEntries(formData);
-										console.log(data);
-										setFormulario(data);
-									}}
-								>
+								<span>Torneo: {torneoData.nombre}</span>
+								<span>Fecha: {torneoData.fech_ini !== torneoData.fech_fin ? torneoData.fech_ini + ' al ' + torneoData.fech_fin : torneoData.fech_ini}</span>
+								<span>Lugar: {torneoData.nombreClubVinculo}</span>
+								<span style={{ color: '#008000', fontWeight: 900 }}>Valor ${torneoData.valor}</span>
+								<Button variant='contained' disabled={!verificado ? true : false} color='success' size='small' onClick={() => handleBuy(torneoData)} title='Generar cupón de pago mediante Mercado Pago'>
+									Generar Cupón de Pago
+								</Button>
+								{preference && (
+									<Wallet
+										initialization={{ preferenceId: preference }}
+										onError={(error) => {
+											console.error(error);
+											alert('Ocurrió un error');
+										}}
+									/>
+								)}
+							</div>
+							<div>
+								<span style={{ fontWeight: 800 }}>Datos del jugador:</span>
+								<hr />
+								<form style={{ display: 'flex', flexDirection: 'column', gap: 5, margin: '10px 0' }} onSubmit={onSubmit} autoComplete='off'>
 									<label>
-										DNI: <input type='number' name='dni' minLength={7} placeholder='sin puntos ni guiones' required />
+										Nombre: <input type='text' name='nombre' placeholder='Ej: Juan' {...register('nombre', { required: 'Completa el nombre *' })} />
 									</label>
+									{errors.nombre && <span style={{ color: 'red', fontSize: 12 }}>{errors.nombre.message}</span>}
 									<label>
-										Nombre: <input type='text' name='nombre' placeholder='Ej: Juan' required />
+										Apellido: <input type='text' name='apellido' placeholder='Ej: Perez' {...register('apellido', { required: 'Completa el apellido *' })} />
 									</label>
+									{errors.apellido && <span style={{ color: 'red', fontSize: 12 }}>{errors.apellido.message}</span>}
 									<label>
-										Apellido: <input type='text' name='apellido' placeholder='Ej: Perez' required />
+										DNI: <input type='number' name='dni' placeholder='sin puntos ni guiones' {...register('dni', { required: 'Completa el dni... *', valueAsNumber: true, minLength: 7, maxLength: 8 })} />
 									</label>
+									{errors.dni && <span style={{ color: 'red', fontSize: 12 }}>{errors.dni.message}</span>}
 									<label>
-										Club Pertenencia: <input type='text' name='clubPer' placeholder='club asociado' required />
+										Club Pertenencia: <input type='text' name='clubPer' placeholder='club asociado' {...register('clubPer', { required: 'Completa el club al que perteneces *' })} />
 									</label>
+									{errors.clubPer && <span style={{ color: 'red', fontSize: 12 }}>{errors.clubPer.message}</span>}
 									<label>
-										Teléfono: <input type='number' name='tel' placeholder='Ej: 3534174147' required />
+										Teléfono: <input type='number' name='tel' placeholder='Ej: 3534174147' {...register('tel', { required: 'Completa el teléfono *', valueAsNumber: true })} />
 									</label>
+									{errors.tel && <span style={{ color: 'red', fontSize: 12 }}>{errors.tel.message}</span>}
 									<label>
-										Email: <input type='email' name='email' placeholder='Ej: juanperez23@ejemplo.com' required />
+										Email:{' '}
+										<input
+											type='email'
+											name='email'
+											placeholder='Ej: juanperez23@ejemplo.com'
+											{...register('email', {
+												required: 'Completa el email *',
+												pattern: {
+													value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+													message: 'Ingresa un email válido *'
+												}
+											})}
+										/>
 									</label>
+									{errors.email && <span style={{ color: 'red', fontSize: 12 }}>{errors.email.message}</span>}
 									<label>
-										HDC: <input type='number' name='hcp' required />
+										HDC: <input type='number' name='hcp' {...register('hdc', { required: 'Completa el handicap *', valueAsNumber: true, maxLength: 2 })} />
 									</label>
+									{errors.hdc && <span style={{ color: 'red', fontSize: 12 }}>{errors.hdc.message}</span>}
 									<label>
-										Categoría:
-										<select name='categoria' required>
+										Categoría:{' '}
+										<select name='categoria' {...register('categoria')}>
 											{torneoData.categorias.map((cat) => (
 												<option value={cat.nombre} key={cat.id}>
 													{cat.nombre}
@@ -151,30 +198,11 @@ function Inscripciones() {
 											))}
 										</select>
 									</label>
+									<span style={{ color: '#1976d2', fontSize: 14 }}>¡Siempre verificá que la categoría sea la correcta!</span>
 									<Button variant='contained' size='small' type='submit'>
 										Cargar
 									</Button>
 								</form>
-							</div>
-							<div>
-								<span>Datos del Torneo:</span>
-								<hr />
-								<span>Torneo: {torneoData.nombre}</span>
-								<span>Fecha: {torneoData.fech_ini !== torneoData.fech_fin ? torneoData.fech_ini + ' al ' + torneoData.fech_fin : torneoData.fech_ini}</span>
-								<span>Lugar: {torneoData.nombreClubVinculo}</span>
-								<span style={{ color: '#008000', fontWeight: 900 }}>Valor ${torneoData.valor}</span>
-								<Button variant='contained' disabled={!formulario ? true : false} color='success' size='small' onClick={() => handleBuy(torneoData)}>
-									Generar Cupón de Pago
-								</Button>
-								{preference && (
-									<Wallet
-										initialization={{ preferenceId: preference, redirectMode: 'blank' }}
-										onError={(error) => {
-											console.error(error);
-											alert('Ocurrió un error');
-										}}
-									/>
-								)}
 							</div>
 						</div>
 					</div>

@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import firebaseApp, { db } from '../firebase/firebase';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import getUsuarios from '../firebase/usuarios';
-
 import { doc, setDoc } from 'firebase/firestore';
 import AdminClubs from './AdminClubs';
 import axios from 'axios';
+
 const auth = getAuth(firebaseApp);
 
 function AdminView({ user }) {
@@ -61,7 +61,7 @@ function AdminView({ user }) {
 
 	return (
 		<>
-			{user.email === 'admin@gmail.com' ? (
+			{user.email === process.env.REACT_APP_EMAIL_ADMIN ? (
 				// VISTA ADMIN GRAL
 				<div className='admin_view'>
 					<button onClick={() => signOut(auth)} className='logout'>

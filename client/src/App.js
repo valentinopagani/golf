@@ -1,9 +1,10 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import './App.css';
 import './adminclub.css';
 import './home.css';
 import './firebase/firebase';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 const AdminView = lazy(() => import('./screens/AdminView'));
 const UserView = lazy(() => import('./screens/UserView'));
@@ -44,7 +45,9 @@ function App() {
 
 	return (
 		<div className='App'>
-			<Suspense fallback={<div className='loading'>Cargando...</div>}>{user ? <AdminView user={user} /> : <UserView />}</Suspense>
+			<Router>
+				<Suspense fallback={<div className='loading'>Cargando...</div>}>{user ? <AdminView user={user} /> : <UserView />}</Suspense>
+			</Router>
 		</div>
 	);
 }

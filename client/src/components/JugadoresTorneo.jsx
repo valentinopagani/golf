@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import Modal from './Modal';
 import ModalEdit from './ModalEdit';
-import axios from 'axios';
 import { MdEdit } from 'react-icons/md';
 import { FaTrash } from 'react-icons/fa';
+import AnalisisInscriptos from './AnalisisInscriptos';
+import { Button, IconButton } from '@mui/material';
+import { IoCloseCircleSharp } from 'react-icons/io5';
+import axios from 'axios';
 
-function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
+function JugadoresTorneo({ club }) {
+	const [torneos, setTorneos] = useState([]);
 	const [jugadores, setJugadores] = useState([]);
 	const [filterJugadoresDni, setFilterJugadoresDni] = useState('');
 	const [filterJugadoresNombre, setFilterJugadoresNombre] = useState('');
 	const [filteredJugadores, setFilteredJugadores] = useState([]);
-	const [jugadoresTorneo, setJugadoresTorneo] = useState(jugadoresTorneos);
+	const [jugadoresTorneo, setJugadoresTorneo] = useState([]);
 	const [filterTorneo, setFilterTorneo] = useState(0);
 	const [filteredTorneo, setFilteredTorneo] = useState(null);
 	const [registrado, setRegistrado] = useState(false);
@@ -19,18 +23,27 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 	const [jugadorDatos, setJugadorDatos] = useState([]);
 	const [torneoDatos, setTorneoDatos] = useState([]);
 	const [filterCategoria, setFilterCategoria] = useState({});
+	const [showGraf, setShowGraf] = useState(false);
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/jugadores')
-			.then((response) => setJugadores(response.data))
+			.get(`http://localhost:3001/torneos?tipo=inscripcionesadmin&clubVinculo=${club.id}`)
+			.then((response) => setTorneos(response.data))
 			.catch((error) => console.error(error));
 
 		axios
-			.get('http://localhost:3001/inscriptos')
-			.then((response) => setJugadoresTorneo(response.data))
+			.get(`http://localhost:3001/jugadores?nombreClub=${club.nombre}`)
+			.then((response) => setJugadores(response.data))
 			.catch((error) => console.error(error));
 	}, []);
+
+	const idsTorneosAdmin = torneos.map((t) => t.id);
+	useEffect(() => {
+		axios
+			.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
+			.then((response) => setJugadoresTorneo(response.data))
+			.catch((error) => console.error(error));
+	}, [torneos]);
 
 	useEffect(() => {
 		setFilteredTorneo(torneos.find((torneo) => torneo.id === filterTorneo));
@@ -58,22 +71,20 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 		}
 	}, [filterJugadoresNombre, filterJugadoresDni, filteredJugadores]);
 
-	const jugadoresPorTorneo = torneos
-		.filter((torneo) => torneo.finalizado === 0 && torneo.clubVinculo === club.id)
-		.reduce((acc, torneo) => {
-			acc[torneo.nombre] = {
-				...torneo,
-				jugadores: jugadoresTorneo.filter((jugador) => jugador.torneo === torneo.id)
-			};
-			return acc;
-		}, {});
+	const jugadoresPorTorneo = torneos.reduce((acc, torneo) => {
+		acc[torneo.nombre] = {
+			...torneo,
+			jugadores: jugadoresTorneo.filter((jugador) => jugador.torneo === torneo.id)
+		};
+		return acc;
+	}, {});
 
 	async function cerrarTorneo(torneo) {
 		try {
 			await axios.put(`http://localhost:3001/torneos/${torneo.id}/finalizar`, { finalizado: 1 });
 			alert('Torneo cerrado correctamente');
 			await axios
-				.get('http://localhost:3001/torneos')
+				.get('http://localhost:3001/torneos?tipo=inscripcionesadmin')
 				.then((response) => setTorneos(response.data))
 				.catch((error) => console.error(error));
 		} catch (error) {
@@ -91,6 +102,13 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 
 	return (
 		<div className='jugadores_admin'>
+			<h3 style={{ textAlign: 'center', fontStyle: 'italic' }}>{club.nombre}</h3>
+			<h2>REGISTRÁ LOS JUGADORES</h2>
+
+			<Button variant='contained' color='primary' sx={{ mt: '25px' }} onClick={() => setShowGraf(true)}>
+				👁 ver gráfico de inscriptos
+			</Button>
+
 			<form
 				className='form_nuevojug'
 				id='form_nuevojug'
@@ -111,7 +129,7 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 						try {
 							await axios.post('http://localhost:3001/inscriptos', { dni, nombre, torneo, categoria, handicap, clubReg, clubSocio, fech_alta });
 							await axios
-								.get('http://localhost:3001/inscriptos')
+								.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
 								.then((response) => setJugadoresTorneo(response.data))
 								.catch((error) => console.error(error));
 						} catch (error) {
@@ -125,11 +143,11 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 							await axios.post('http://localhost:3001/jugadores', { dni, nombre, fech_nac, sexo, clubReg, fech_alta });
 							await axios.post('http://localhost:3001/inscriptos', { dni, nombre, torneo, categoria, handicap, clubReg, clubSocio, fech_alta });
 							await axios
-								.get('http://localhost:3001/jugadores')
+								.get(`http://localhost:3001/jugadores?nombreClub=${club.nombre}`)
 								.then((response) => setJugadores(response.data))
 								.catch((error) => console.error(error));
 							await axios
-								.get('http://localhost:3001/inscriptos')
+								.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
 								.then((response) => setJugadoresTorneo(response.data))
 								.catch((error) => console.error(error));
 						} catch (error) {
@@ -149,22 +167,17 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 							Seleccionar torneo
 						</option>
 						{torneos
-							.filter((torneo) => torneo.clubVinculo === club.id && !torneo.finalizado)
+							.filter((torneo) => torneo.clubVinculo === club.id)
 							.map((torneo) => (
-								<option value={torneo.id}>{torneo.nombre}</option>
+								<option value={torneo.id} key={torneo.id}>
+									{torneo.nombre}
+								</option>
 							))}
 					</select>
 					<span>Categoria: </span>
 					<select id='categoria' required>
 						{filteredTorneo && filteredTorneo.categorias.length > 0 ? (
-							<>
-								<option selected disabled>
-									Seleccionar categoria
-								</option>
-								{filteredTorneo.categorias.map((categoria) => (
-									<option>{categoria.nombre}</option>
-								))}
-							</>
+							filteredTorneo.categorias.map((categoria, i) => <option key={i}>{categoria.nombre}</option>)
 						) : (
 							<option selected disabled>
 								Elige un torneo
@@ -288,7 +301,7 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 																		try {
 																			await axios.delete(`http://localhost:3001/inscriptos/${jugador.id}`);
 																			await axios
-																				.get('http://localhost:3001/inscriptos')
+																				.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
 																				.then((response) => setJugadoresTorneo(response.data))
 																				.catch((error) => console.error(error));
 																		} catch (error) {
@@ -307,9 +320,22 @@ function JugadoresTorneo({ club, torneos, jugadoresTorneos, setTorneos }) {
 						</div>
 					);
 				})}
-				{isOpen && <Modal torneoDatos={torneoDatos} jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} setIsOpen={setIsOpen} />}
-				{isOpenEdit && <ModalEdit jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} setIsOpen={setIsOpenEdit} />}
 			</div>
+
+			{isOpen && <Modal torneoDatos={torneoDatos} jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} idsTorneosAdmin={idsTorneosAdmin} setIsOpen={setIsOpen} />}
+
+			{isOpenEdit && <ModalEdit jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} idsTorneosAdmin={idsTorneosAdmin} setIsOpen={setIsOpenEdit} />}
+
+			{showGraf && (
+				<div className='modal'>
+					<div className='modal_cont'>
+						<AnalisisInscriptos club={club} />
+					</div>
+					<IconButton size='medium' sx={{ position: 'absolute', top: 5, right: 10, color: 'white' }} onClick={() => setShowGraf(false)}>
+						<IoCloseCircleSharp fontSize='40' />
+					</IconButton>
+				</div>
+			)}
 		</div>
 	);
 }
