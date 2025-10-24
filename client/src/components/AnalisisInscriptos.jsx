@@ -25,7 +25,7 @@ function AnalisisInscriptos({ club }) {
 
 	useEffect(() => {
 		axios
-			.get(`http://localhost:3001/estadisticas/categoryStats?club=${encodeURIComponent(JSON.stringify(club))}&fechaMin=${fechaMin}&fechaMax=${fechaMax}`)
+			.get(`http://localhost:3001/estadisticas/inscriptosStats?club=${encodeURIComponent(JSON.stringify(club))}&fechaMin=${fechaMin}&fechaMax=${fechaMax}`)
 			.then((response) => setCategoryStats(response.data))
 			.catch((error) => console.error(error));
 	}, [fechaMin, fechaMax]);

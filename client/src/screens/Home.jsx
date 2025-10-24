@@ -3,7 +3,6 @@ import { Box, Paper, Typography } from '@mui/material';
 import { GiGolfFlag } from 'react-icons/gi';
 import logo from '../components/logo.png';
 import TorneosHome from '../components/TorneosHome';
-import { parse, compareAsc } from 'date-fns';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -23,27 +22,13 @@ function Home() {
 			.catch((error) => console.error(error));
 	}, []);
 
-	const date = new Date();
-	let day = date.getDate();
-	if (day < 10) {
-		day = '0' + day;
-	}
-	let month = date.getMonth() + 1;
-	if (month < 10) {
-		month = '0' + month;
-	}
-	const year = date.getFullYear();
-	const actualDate = year + '/' + month + '/' + day;
-
-	// const filteredTorneos = torneos.filter((torneo) => torneo.fech_ini.split('/').reverse().join('/') >= actualDate).sort((a, b) => compareAsc(parse(a.fech_ini, 'dd/MM/yyyy', new Date()), parse(b.fech_ini, 'dd/MM/yyyy', new Date())));
-
 	return (
 		<div>
 			<div className='banner_home'>
 				<div>
 					<h1>
 						Golf<b>Point</b>
-						<GiGolfFlag size={40} />
+						<GiGolfFlag size={48} />
 					</h1>
 					<p>Precisión e información para un juego perfecto...</p>
 					<Link to='/inscripciones'>Inscripciones</Link>

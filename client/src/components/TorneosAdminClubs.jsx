@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FormGroup, IconButton, Paper, Typography } from '@mui/material';
 import { FaSearch } from 'react-icons/fa';
-import TorneosAdmin from '../components/TorneosAdmin';
-import EstadisticasTorneo from '../components/EstadisticasTorneo';
+import TorneosAdmin from './TorneosAdmin';
+import EstadisticasTorneo from './EstadisticasTorneo';
 import { FaPencil } from 'react-icons/fa6';
 import axios from 'axios';
 
-function MainAdminClubs({ club, user }) {
+function TorneosAdminClubs({ club, user }) {
 	const [torneosProximos, setTorneosProximos] = useState([]);
 	const [torneosAntiguos, setTorneosAntiguos] = useState([]);
 	const [categorias, setCategorias] = useState([]);
@@ -27,7 +27,7 @@ function MainAdminClubs({ club, user }) {
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/canchas')
+			.get(`http://localhost:3001/canchas?idClub=${club.id}`)
 			.then((response) => setCanchas(response.data))
 			.catch((error) => console.error(error));
 
@@ -42,12 +42,12 @@ function MainAdminClubs({ club, user }) {
 			.catch((error) => console.error(error));
 
 		axios
-			.get('http://localhost:3001/categorias')
+			.get(`http://localhost:3001/categorias?club=${club.id}`)
 			.then((response) => setCategorias(response.data))
 			.catch((error) => console.error(error));
 
 		axios
-			.get('http://localhost:3001/inscriptos')
+			.get(`http://localhost:3001/inscriptos?clubReg=${club.id}`)
 			.then((response) => setJugadoresTorneos(response.data))
 			.catch((error) => console.error(error));
 	}, []);
@@ -123,32 +123,30 @@ function MainAdminClubs({ club, user }) {
 					<button type='submit'>Crear</button>
 				</form>
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 15, marginTop: 10 }}>
-					{categorias
-						.filter((cat) => cat.vinculo === club.id)
-						.map((cat) => (
-							<Paper key={cat.id} elevation={1} sx={{ padding: 1 }}>
-								<span>{cat.nombre} </span>
-								<span
-									style={{ cursor: 'pointer', color: 'red' }}
-									title='Eliminar categoria'
-									onClick={async () => {
-										if (!window.confirm('¿Seguro que deseas eliminar esta categoria?')) return;
-										try {
-											await axios.delete(`http://localhost:3001/categorias/${cat.id}`);
-											await axios
-												.get(`http://localhost:3001/categorias?club=${club.id}`)
-												.then((response) => setCategorias(response.data))
-												.catch((error) => console.error(error));
-										} catch (error) {
-											alert('Error al eliminar categoria');
-											console.error(error);
-										}
-									}}
-								>
-									x
-								</span>
-							</Paper>
-						))}
+					{categorias.map((cat) => (
+						<Paper key={cat.id} elevation={1} sx={{ padding: 1 }}>
+							<span>{cat.nombre} </span>
+							<span
+								style={{ cursor: 'pointer', color: 'red' }}
+								title='Eliminar categoria'
+								onClick={async () => {
+									if (!window.confirm('¿Seguro que deseas eliminar esta categoria?')) return;
+									try {
+										await axios.delete(`http://localhost:3001/categorias/${cat.id}`);
+										await axios
+											.get(`http://localhost:3001/categorias?club=${club.id}`)
+											.then((response) => setCategorias(response.data))
+											.catch((error) => console.error(error));
+									} catch (error) {
+										alert('Error al eliminar categoria');
+										console.error(error);
+									}
+								}}
+							>
+								x
+							</span>
+						</Paper>
+					))}
 				</div>
 			</div>
 
@@ -231,13 +229,11 @@ function MainAdminClubs({ club, user }) {
 							<div>
 								<label>Cancha:</label>
 								<select id='cancha_juego' required>
-									{canchas
-										.filter((cancha) => cancha.clubVinculo === club.id)
-										.map((cancha) => (
-											<option key={cancha.id} value={cancha.id}>
-												{cancha.nombre} ({cancha.cant_hoyos} hoyos)
-											</option>
-										))}
+									{canchas.map((cancha) => (
+										<option key={cancha.id} value={cancha.id}>
+											{cancha.nombre} ({cancha.cant_hoyos} hoyos)
+										</option>
+									))}
 								</select>
 							</div>
 							<div>
@@ -252,14 +248,12 @@ function MainAdminClubs({ club, user }) {
 							<div>
 								<label>Seleccionar categoría/s:</label>
 								<FormGroup onChange={handleCheckboxChange}>
-									{categorias
-										.filter((categoria) => categoria.vinculo === club.id)
-										.map((categoria) => (
-											<div key={categoria.id}>
-												<input type='checkbox' value={categoria.nombre} className='pointer' />
-												<label key={categoria.id}> {categoria.nombre}</label>
-											</div>
-										))}
+									{categorias.map((categoria) => (
+										<div key={categoria.id}>
+											<input type='checkbox' value={categoria.nombre} className='pointer' />
+											<label key={categoria.id}> {categoria.nombre}</label>
+										</div>
+									))}
 								</FormGroup>
 							</div>
 							<textarea id='descripcion_tor' placeholder='Añade una descripcion:' />
@@ -295,7 +289,7 @@ function MainAdminClubs({ club, user }) {
 							.sort((a, b) => new Date(a.fech_ini.split('/').reverse().join('-')) - new Date(b.fech_ini.split('/').reverse().join('-')))
 							.map((torneo) => (
 								<div key={torneo.id} className='torneo_adm'>
-									<TorneosAdmin torneo={torneo} club={club} setTorneos={setTorneosProximos} />
+									<TorneosAdmin torneo={torneo} club={club} />
 									{!torneo.finalizado && (
 										<IconButton
 											className='edit_bt'
@@ -332,7 +326,7 @@ function MainAdminClubs({ club, user }) {
 									.sort((a, b) => new Date(b.fech_ini.split('/').reverse().join('-')) - new Date(a.fech_ini.split('/').reverse().join('-')))
 									.map((torneo) => (
 										<div key={torneo.id} onDoubleClick={() => handleTorneoClick(torneo)} className='torneo_adm'>
-											<TorneosAdmin torneo={torneo} club={club} setTorneos={setTorneosAntiguos} />
+											<TorneosAdmin torneo={torneo} club={club} />
 											{!torneo.finalizado && (
 												<IconButton
 													className='edit_bt'
@@ -438,13 +432,11 @@ function MainAdminClubs({ club, user }) {
 									<option selected disabled>
 										Selecciona una chancha
 									</option>
-									{canchas
-										.filter((cancha) => cancha.clubVinculo === clubEdit.id)
-										.map((cancha) => (
-											<option key={cancha.id} value={cancha.id}>
-												{cancha.nombre} ({cancha.cant_hoyos} hoyos)
-											</option>
-										))}
+									{canchas.map((cancha) => (
+										<option key={cancha.id} value={cancha.id}>
+											{cancha.nombre} ({cancha.cant_hoyos} hoyos)
+										</option>
+									))}
 								</select>
 							</div>
 							<div>
@@ -459,20 +451,18 @@ function MainAdminClubs({ club, user }) {
 							<div>
 								<label>Seleccionar categoría/s:</label>
 								<FormGroup onChange={handleCheckboxChange}>
-									{categorias
-										.filter((categoria) => categoria.vinculo === clubEdit.id)
-										.map((categoria) => (
-											<div key={categoria.id}>
-												<input
-													type='checkbox'
-													value={categoria.nombre}
-													className='pointer'
-													// defaultChecked compara con el array de nombres
-													defaultChecked={selectedCategorias.includes(categoria.nombre)}
-												/>
-												<span> {categoria.nombre}</span>
-											</div>
-										))}
+									{categorias.map((categoria) => (
+										<div key={categoria.id}>
+											<input
+												type='checkbox'
+												value={categoria.nombre}
+												className='pointer'
+												// defaultChecked compara con el array de nombres
+												defaultChecked={selectedCategorias.includes(categoria.nombre)}
+											/>
+											<span> {categoria.nombre}</span>
+										</div>
+									))}
 								</FormGroup>
 							</div>
 							<textarea id='descripcion_tor' placeholder='Añade una descripcion:' defaultValue={datosEdit.descripcion} />
@@ -504,4 +494,4 @@ function MainAdminClubs({ club, user }) {
 		</div>
 	);
 }
-export default MainAdminClubs;
+export default TorneosAdminClubs;

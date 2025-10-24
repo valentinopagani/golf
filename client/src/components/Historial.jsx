@@ -1,85 +1,63 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import ModalEst from './ModalEst';
 import axios from 'axios';
 
-function Historial({ jugador }) {
-	const [jugadoresTorneos, setJugadoresTorneos] = useState([]);
-	const [torneos, setTorneos] = useState([]);
-	const [canchas, setCanchas] = useState([]);
+function Historial({ dni }) {
+	const [historialJugador, setHistorialJugador] = useState([]);
 	const [isOpen, setIsOpen] = useState(false);
 	const [torneoDatos, setTorneoDatos] = useState([]);
 	const [jugadorDatos, setJugadorDatos] = useState([]);
 
 	useEffect(() => {
 		axios
-			.get('http://localhost:3001/canchas')
-			.then((response) => setCanchas(response.data))
-			.catch((error) => console.error(error));
-
-		axios
-			.get('http://localhost:3001/torneos')
-			.then((response) => setTorneos(response.data))
-			.catch((error) => console.error(error));
-
-		axios
-			.get('http://localhost:3001/inscriptos')
-			.then((response) => setJugadoresTorneos(response.data))
+			.get(`http://localhost:3001/inscriptos/historial?dni=${dni}`)
+			.then((response) => setHistorialJugador(response.data))
 			.catch((error) => console.error(error));
 	}, []);
 
-	const jugados = useMemo(() => {
-		return jugadoresTorneos.filter((torneo) => torneo.dni === jugador.dni);
-	}, [jugadoresTorneos, jugador.dni]);
+	console.log(historialJugador);
 
-	const renderJugados = () => {
-		return jugados.map((jugado) => {
-			const torneo = torneos.find((torneo) => torneo.id === jugado.torneo);
-			if (torneo) {
-				const cancha = canchas.find((cancha) => cancha.id === torneo.cancha);
-				if (cancha) {
-					const total = jugado.categoria.toLowerCase().includes('gross') || jugado.categoria.toLowerCase().includes('scratch') ? jugado.totalScore : jugado.totalScore - jugado.handicap * torneo.rondas;
-					return (
-						<tr key={jugado.id}>
-							<td>{torneo.fech_ini}</td>
-							<td
-								className='pointer'
-								onClick={() => {
-									setTorneoDatos(torneo);
-									setJugadorDatos(jugado);
-									setIsOpen(true);
-								}}
-							>
-								<b style={{ color: 'brown', fontWeight: 900 }}>+</b> {torneo.nombre}
-							</td>
-							<td>{jugado.categoria}</td>
-							<td>{torneo.nombreClubVinculo}</td>
-							<td>{total}</td>
-							<td>{total - cancha.parCancha * torneo.rondas}</td>
-						</tr>
-					);
-				}
-			}
-			return null;
+	const renderTorneosJugados = () => {
+		return historialJugador.inscriptos?.map((jugador) => {
+			const torneo = historialJugador.torneos.find((torneo) => torneo.id === jugador.torneo);
+			const total = jugador.categoria.toLowerCase().includes('gross') || jugador.categoria.toLowerCase().includes('scratch') ? jugador.totalScore : jugador.totalScore - jugador.handicap * torneo.rondas;
+			return (
+				<tr key={jugador.id}>
+					<td>{torneo?.fech_ini}</td>
+					<td
+						className='pointer'
+						onClick={() => {
+							setTorneoDatos(torneo);
+							setJugadorDatos(jugador);
+							setIsOpen(true);
+						}}
+					>
+						<b style={{ color: 'brown', fontWeight: 900 }}>+</b> {torneo?.nombre}
+					</td>
+					<td>{jugador.categoria}</td>
+					<td>{torneo?.nombreClubVinculo}</td>
+					<td>{total}</td>
+				</tr>
+			);
 		});
 	};
 
 	return (
 		<div className='table_container'>
 			<table>
-				<caption>{jugados.length} TORNEOS</caption>
+				<caption>{historialJugador.torneos?.length} TORNEO/S</caption>
 				<thead>
 					<tr>
 						<th>Fecha</th>
 						<th>Torneo</th>
 						<th>Categoría</th>
 						<th>Club</th>
-						<th>Total</th>
-						<th>Contra el Par</th>
+						<th>Score</th>
 					</tr>
 				</thead>
-				<tbody>{renderJugados()}</tbody>
+				<tbody>{renderTorneosJugados()}</tbody>
 			</table>
-			{isOpen && <ModalEst torneo={torneoDatos} jugadorDatos={jugadorDatos} canchas={canchas} setIsOpen={setIsOpen} condicion={true} />}
+			{isOpen && <ModalEst torneo={torneoDatos} jugadorDatos={jugadorDatos} setIsOpen={setIsOpen} condicion={true} />}
 		</div>
 	);
 }

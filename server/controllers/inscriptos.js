@@ -49,6 +49,29 @@ const editScores = (req, res) => {
 	});
 };
 
+const getHistorial = (req, res) => {
+	let historialSql = 'SELECT * FROM inscriptos';
+
+	if (req.query.dni) {
+		const { dni } = req.query;
+		historialSql += ` WHERE dni = '${dni}'`;
+	}
+	db.query(historialSql + ` ORDER BY STR_TO_DATE(fech_alta, '%d/%m/%Y') ASC`, (err, inscriptos) => {
+		if (err) return res.status(500).json({ error: err.message });
+
+		// Extract unique torneo IDs from inscriptos
+		const torneoIds = [...new Set(inscriptos.map((insc) => insc.torneo))];
+
+		// Fetch tournaments based on the extracted IDs
+		const torneosSql = `SELECT * FROM torneos WHERE id IN (${torneoIds.join(',')})`;
+
+		db.query(torneosSql, (err, torneos) => {
+			if (err) return res.status(500).json({ error: err.message });
+			res.json({ inscriptos, torneos });
+		});
+	});
+};
+
 const deleteInscripto = (req, res) => {
 	const jugId = req.params.id;
 	db.query('DELETE FROM inscriptos WHERE id = ?', [jugId], (err, result) => {
@@ -57,4 +80,4 @@ const deleteInscripto = (req, res) => {
 	});
 };
 
-module.exports = { getInscriptos, setInscriptos, setScores, editScores, deleteInscripto };
+module.exports = { getInscriptos, setInscriptos, setScores, editScores, getHistorial, deleteInscripto };

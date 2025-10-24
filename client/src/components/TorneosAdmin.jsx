@@ -2,15 +2,13 @@ import { Button, Paper, Typography } from '@mui/material';
 import { parse, subMonths } from 'date-fns';
 import axios from 'axios';
 
-function TorneosAdmin({ torneo, club, setTorneos }) {
+function TorneosAdmin({ torneo, club }) {
 	async function eliminarTorneo() {
 		if (!window.confirm('¿Seguro que deseas eliminar este torneo?')) return;
 		try {
 			await axios.delete(`http://localhost:3001/torneos/${torneo.id}`);
-			await axios
-				.get('http://localhost:3001/torneos')
-				.then((response) => setTorneos(response.data))
-				.catch((error) => console.error(error));
+			window.alert('Torneo eliminado correctamente');
+			window.location.reload();
 		} catch (error) {
 			alert('Error al eliminar el torneo');
 			console.error(error);
@@ -66,10 +64,7 @@ function TorneosAdmin({ torneo, club, setTorneos }) {
 						try {
 							await axios.put(`http://localhost:3001/torneos/${torneo.id}/reabrir`, { finalizado: 0 });
 							alert('Torneo reabierto correctamente');
-							await axios
-								.get('http://localhost:3001/torneos')
-								.then((response) => setTorneos(response.data))
-								.catch((error) => console.error(error));
+							window.location.reload();
 						} catch (error) {
 							alert('Error al reabrir torneo');
 							console.error(error);

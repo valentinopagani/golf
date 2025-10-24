@@ -149,15 +149,15 @@ function Inscripciones() {
 								<hr />
 								<form style={{ display: 'flex', flexDirection: 'column', gap: 5, margin: '10px 0' }} onSubmit={onSubmit} autoComplete='off'>
 									<label>
-										Nombre: <input type='text' name='nombre' placeholder='Ej: Juan' {...register('nombre', { required: 'Completa el nombre *' })} />
+										Nombre: <input type='text' name='nombre' placeholder='ej: Juan' {...register('nombre', { required: 'Completa el nombre *' })} />
 									</label>
 									{errors.nombre && <span style={{ color: 'red', fontSize: 12 }}>{errors.nombre.message}</span>}
 									<label>
-										Apellido: <input type='text' name='apellido' placeholder='Ej: Perez' {...register('apellido', { required: 'Completa el apellido *' })} />
+										Apellido: <input type='text' name='apellido' placeholder='ej: Perez' {...register('apellido', { required: 'Completa el apellido *' })} />
 									</label>
 									{errors.apellido && <span style={{ color: 'red', fontSize: 12 }}>{errors.apellido.message}</span>}
 									<label>
-										DNI: <input type='number' name='dni' placeholder='sin puntos ni guiones' {...register('dni', { required: 'Completa el dni... *', valueAsNumber: true, minLength: 7, maxLength: 8 })} />
+										DNI: <input type='number' name='dni' placeholder='sin puntos ni guiones' {...register('dni', { required: 'Completa el dni... *', valueAsNumber: true, min: { value: 1000000, message: 'Debe contener al menos 7 dígitos' }, max: { value: 99999999, message: 'Debe contener como máximo 8 dígitos' } })} />
 									</label>
 									{errors.dni && <span style={{ color: 'red', fontSize: 12 }}>{errors.dni.message}</span>}
 									<label>
@@ -165,15 +165,15 @@ function Inscripciones() {
 									</label>
 									{errors.clubPer && <span style={{ color: 'red', fontSize: 12 }}>{errors.clubPer.message}</span>}
 									<label>
-										Teléfono: <input type='number' name='tel' placeholder='Ej: 3534174147' {...register('tel', { required: 'Completa el teléfono *', valueAsNumber: true })} />
+										Teléfono: <input type='number' name='tel' placeholder='ej: 3534174147' {...register('tel', { required: 'Completa el teléfono *', valueAsNumber: true })} />
 									</label>
 									{errors.tel && <span style={{ color: 'red', fontSize: 12 }}>{errors.tel.message}</span>}
 									<label>
-										Email:{' '}
+										Email:
 										<input
 											type='email'
 											name='email'
-											placeholder='Ej: juanperez23@ejemplo.com'
+											placeholder='ej: juanperez23@ejemplo.com'
 											{...register('email', {
 												required: 'Completa el email *',
 												pattern: {
@@ -185,11 +185,11 @@ function Inscripciones() {
 									</label>
 									{errors.email && <span style={{ color: 'red', fontSize: 12 }}>{errors.email.message}</span>}
 									<label>
-										HDC: <input type='number' name='hcp' {...register('hdc', { required: 'Completa el handicap *', valueAsNumber: true, maxLength: 2 })} />
+										HDC: <input type='number' name='hcp' {...register('hdc', { required: 'Completa el handicap *', valueAsNumber: true, min: { value: 0, message: 'No se puede cargar un HDC negativo' }, max: { value: 99, message: 'Debe contener como máximo 2 dígitos' } })} />
 									</label>
 									{errors.hdc && <span style={{ color: 'red', fontSize: 12 }}>{errors.hdc.message}</span>}
 									<label>
-										Categoría:{' '}
+										Categoría:
 										<select name='categoria' {...register('categoria')}>
 											{torneoData.categorias.map((cat) => (
 												<option value={cat.nombre} key={cat.id}>

@@ -79,10 +79,10 @@ function JugadoresTorneo({ club }) {
 		return acc;
 	}, {});
 
-	async function cerrarTorneo(torneo) {
+	async function cerrarTorneo(torneoId) {
 		try {
-			await axios.put(`http://localhost:3001/torneos/${torneo.id}/finalizar`, { finalizado: 1 });
-			alert('Torneo cerrado correctamente');
+			if (!window.confirm('¿Deseas cerrar este torneo?')) return;
+			await axios.put(`http://localhost:3001/torneos/${torneoId}/finalizar`, { finalizado: 1 });
 			await axios
 				.get('http://localhost:3001/torneos?tipo=inscripcionesadmin')
 				.then((response) => setTorneos(response.data))
@@ -163,9 +163,7 @@ function JugadoresTorneo({ club }) {
 				<div>
 					<span>Torneo: </span>
 					<select id='torneo' onChange={(e) => setFilterTorneo(parseInt(e.target.value))} required>
-						<option disabled selected>
-							Seleccionar torneo
-						</option>
+						<option>Elegir...</option>
 						{torneos
 							.filter((torneo) => torneo.clubVinculo === club.id)
 							.map((torneo) => (
@@ -176,21 +174,14 @@ function JugadoresTorneo({ club }) {
 					</select>
 					<span>Categoria: </span>
 					<select id='categoria' required>
-						{filteredTorneo && filteredTorneo.categorias.length > 0 ? (
-							filteredTorneo.categorias.map((categoria, i) => <option key={i}>{categoria.nombre}</option>)
-						) : (
-							<option selected disabled>
-								Elige un torneo
-							</option>
-						)}
+						{filteredTorneo && filteredTorneo.categorias.length > 0 ? filteredTorneo.categorias.map((categoria, i) => <option key={i}>{categoria.nombre}</option>) : <option disabled>Primero elige un torneo</option>}
 					</select>
 					<span>DNI: </span>
 					<input type='text' id='dni' onChange={(e) => setFilterJugadoresDni(e.target.value)} placeholder={registrado && filteredJugadores[0] ? filteredJugadores[0].dni : '(sin puntos)'} />
 					<span>Nombre: </span>
 					<input type='text' id='nombre' onChange={(e) => setFilterJugadoresNombre(e.target.value)} placeholder={registrado && filteredJugadores[0] ? filteredJugadores[0].nombre : '(apellido y nombre)'} />
 				</div>
-				{registrado && filteredJugadores[0] && <span className='green'>Ya tenemos los datos de {filteredJugadores[0].dni + ' - ' + filteredJugadores[0].nombre}!!</span>}
-				{!registrado && (
+				{!registrado ? (
 					<div>
 						<span>Fecha de nacimiento: </span>
 						<input type='date' id='fech_nac' />
@@ -201,6 +192,8 @@ function JugadoresTorneo({ club }) {
 							<option value='X'>Otro</option>
 						</select>
 					</div>
+				) : (
+					registrado && filteredJugadores[0] && <span className='green'>Ya tenemos los datos de {filteredJugadores[0].dni + ' - ' + filteredJugadores[0].nombre}!!</span>
 				)}
 				<div>
 					<span>Handicap: </span>
@@ -211,116 +204,112 @@ function JugadoresTorneo({ club }) {
 				<button type='submit'>Inscribir +</button>
 			</form>
 
-			<div>
-				{Object.keys(jugadoresPorTorneo).map((torneoNombre) => {
-					const torneo = jugadoresPorTorneo[torneoNombre];
-					const categorias = [...new Set(torneo.jugadores.map((jugador) => jugador.categoria))];
-					const selectedCategoria = filterCategoria[torneo.id] || 'Todas';
-					return (
-						<div key={torneoNombre} className='jugadores_torneo'>
-							<div className='jugadores_torneo_header'>
-								<span>{torneoNombre.toUpperCase()}</span>
-
-								<select value={selectedCategoria} onChange={(e) => handleCategoriaChange(torneo.id, e.target.value)}>
-									<option value='Todas'>Todas las categorías</option>
-									{categorias.map((categoria) => (
-										<option key={categoria} value={categoria}>
-											{categoria}
-										</option>
-									))}
-								</select>
-
-								<button onClick={() => cerrarTorneo(torneo)}>Cerrar torneo</button>
-							</div>
-							{torneo.jugadores.length === 0 && <p>No hay jugadores inscriptos...</p>}
-							{categorias
-								.filter((categoria) => selectedCategoria === 'Todas' || categoria === selectedCategoria)
-								.map((categoria) => (
-									<div key={categoria} className='table_container'>
-										<table>
-											<caption>
-												{torneoNombre} - {categoria.toUpperCase()}
-												<label>
-													{torneo.jugadores.filter((jugador) => jugador.categoria === categoria).length} inscriptos, {torneo.jugadores.filter((jugador) => jugador.categoria === categoria && jugador.scores).length} scores
-												</label>
-											</caption>
-											<thead>
-												<tr>
-													<th>DNI</th>
-													<th>Nombre</th>
-													<th>HCP</th>
-													<th>Club Asociado</th>
-													<th>Fecha Inscripcion</th>
-													<th>Scores</th>
-													<th />
-													<th />
-												</tr>
-											</thead>
-											<tbody>
-												{torneo.jugadores
-													.filter((jugador) => jugador.categoria === categoria)
-													.map((jugador) => (
-														<tr key={jugador.dni}>
-															<td>{jugador.dni}</td>
-															<td>{jugador.nombre}</td>
-															<td>{jugador.handicap}</td>
-															<td>{jugador.clubSocio}</td>
-															<td>{jugador.fech_alta}</td>
-															<td>
-																{jugador.scores ? (
-																	<span>✅</span>
-																) : (
-																	<span
-																		onClick={() => {
-																			setJugadorDatos(jugador);
-																			setTorneoDatos(torneo);
-																			setIsOpen(true);
-																		}}
-																		className='pointer'
-																	>
-																		❌
-																	</span>
-																)}
-															</td>
-															<td
-																onClick={() => {
-																	setJugadorDatos(jugador);
-																	setTorneoDatos(torneo);
-																	setIsOpenEdit(true);
-																}}
-																className='pointer'
-															>
-																<MdEdit size={20} />
-															</td>
-															<td>
-																<FaTrash
-																	className='pointer'
-																	title='Eliminar'
-																	onClick={async () => {
-																		if (!window.confirm(`¿Seguro que deseas eliminar a ${jugador.nombre}?`)) return;
-																		try {
-																			await axios.delete(`http://localhost:3001/inscriptos/${jugador.id}`);
-																			await axios
-																				.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
-																				.then((response) => setJugadoresTorneo(response.data))
-																				.catch((error) => console.error(error));
-																		} catch (error) {
-																			alert('Error al eliminar jugador');
-																			console.error(error);
-																		}
-																	}}
-																/>
-															</td>
-														</tr>
-													))}
-											</tbody>
-										</table>
-									</div>
+			{Object.keys(jugadoresPorTorneo).map((torneoNombre) => {
+				const torneo = jugadoresPorTorneo[torneoNombre];
+				const categorias = [...new Set(torneo.jugadores.map((jugador) => jugador.categoria))];
+				const selectedCategoria = filterCategoria[torneo.id] || 'Todas';
+				return (
+					<div key={torneoNombre} className='jugadores_torneo'>
+						<div className='jugadores_torneo_header'>
+							<select value={selectedCategoria} onChange={(e) => handleCategoriaChange(torneo.id, e.target.value)}>
+								<option value='Todas'>Todas las categorías</option>
+								{categorias.map((categoria) => (
+									<option key={categoria} value={categoria}>
+										{categoria}
+									</option>
 								))}
+							</select>
+							<span>{torneoNombre.toUpperCase()}</span>
+							<button onClick={() => cerrarTorneo(torneo.id)}>Cerrar torneo</button>
 						</div>
-					);
-				})}
-			</div>
+						{torneo.jugadores.length === 0 && <p>No hay jugadores inscriptos...</p>}
+						{categorias
+							.filter((categoria) => selectedCategoria === 'Todas' || categoria === selectedCategoria)
+							.map((categoria) => (
+								<div key={categoria} className='table_container'>
+									<table>
+										<caption>
+											Cat. {categoria.toUpperCase()}
+											<label>
+												{' (' + torneo.jugadores.filter((jugador) => jugador.categoria === categoria).length} inscriptos, {torneo.jugadores.filter((jugador) => jugador.categoria === categoria && jugador.scores).length} scores)
+											</label>
+										</caption>
+										<thead>
+											<tr>
+												<th>DNI</th>
+												<th>Nombre</th>
+												<th>HCP</th>
+												<th>Club Asociado</th>
+												<th>Fecha Inscripcion</th>
+												<th>Scores</th>
+												<th />
+												<th />
+											</tr>
+										</thead>
+										<tbody>
+											{torneo.jugadores
+												.filter((jugador) => jugador.categoria === categoria)
+												.map((jugador) => (
+													<tr key={jugador.dni}>
+														<td>{jugador.dni}</td>
+														<td>{jugador.nombre}</td>
+														<td>{jugador.handicap}</td>
+														<td>{jugador.clubSocio}</td>
+														<td>{jugador.fech_alta}</td>
+														<td>
+															{jugador.scores ? (
+																<span>✅</span>
+															) : (
+																<span
+																	onClick={() => {
+																		setJugadorDatos(jugador);
+																		setTorneoDatos(torneo);
+																		setIsOpen(true);
+																	}}
+																	className='pointer'
+																>
+																	❌
+																</span>
+															)}
+														</td>
+														<td
+															onClick={() => {
+																setJugadorDatos(jugador);
+																setTorneoDatos(torneo);
+																setIsOpenEdit(true);
+															}}
+															className='pointer'
+														>
+															<MdEdit size={20} />
+														</td>
+														<td>
+															<FaTrash
+																className='pointer'
+																title='Eliminar'
+																onClick={async () => {
+																	if (!window.confirm(`¿Seguro que deseas eliminar a ${jugador.nombre}?`)) return;
+																	try {
+																		await axios.delete(`http://localhost:3001/inscriptos/${jugador.id}`);
+																		await axios
+																			.get(`http://localhost:3001/inscriptos?torneos=${idsTorneosAdmin.join(',')}`)
+																			.then((response) => setJugadoresTorneo(response.data))
+																			.catch((error) => console.error(error));
+																	} catch (error) {
+																		alert('Error al eliminar jugador');
+																		console.error(error);
+																	}
+																}}
+															/>
+														</td>
+													</tr>
+												))}
+										</tbody>
+									</table>
+								</div>
+							))}
+					</div>
+				);
+			})}
 
 			{isOpen && <Modal torneoDatos={torneoDatos} jugadorDatos={jugadorDatos} setJugadoresTorneo={setJugadoresTorneo} idsTorneosAdmin={idsTorneosAdmin} setIsOpen={setIsOpen} />}
 

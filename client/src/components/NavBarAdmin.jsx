@@ -71,16 +71,24 @@ function NavBarAdmin() {
 							}}
 						>
 							<MenuItem>
-								<span className='nav_a'>Añadir y Ver Torneos</span>
+								<Link to='/administrador' className='nav_a'>
+									Torneos
+								</Link>
 							</MenuItem>
 							<MenuItem>
-								<span className='nav_a'>Inscripciones</span>
+								<Link to='/administrador/inscripciones' className='nav_a'>
+									Inscripciones
+								</Link>
 							</MenuItem>
 							<MenuItem>
-								<span className='nav_a'>Tu Cancha</span>
+								<Link to='/administrador/jugadores' className='nav_a'>
+									Jugadores
+								</Link>
 							</MenuItem>
 							<MenuItem>
-								<span className='nav_a'>Jugadores</span>
+								<Link to='/administrador/miscanchas' className='nav_a'>
+									Mis Canchas
+								</Link>
 							</MenuItem>
 						</Menu>
 					</Box>
@@ -94,16 +102,16 @@ function NavBarAdmin() {
 						}}
 					>
 						<Link to='/administrador' className='nav_a' sx={{ my: 2, display: 'block' }}>
-							Añadir y Ver Torneos
+							Torneos
 						</Link>
 						<Link to='/administrador/inscripciones' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Inscripciones
 						</Link>
-						<Link to='/administrador' className='nav_a' sx={{ my: 2, display: 'block' }}>
-							Tu Cancha
-						</Link>
-						<Link to='/' className='nav_a' sx={{ my: 2, display: 'block' }}>
+						<Link to='/administrador/jugadores' className='nav_a' sx={{ my: 2, display: 'block' }}>
 							Jugadores
+						</Link>
+						<Link to='/administrador/miscanchas' className='nav_a'>
+							Mis Canchas
 						</Link>
 					</Box>
 					<Box sx={{ flexGrow: 0 }}>

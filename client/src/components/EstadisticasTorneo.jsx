@@ -9,14 +9,14 @@ const ModalEst = lazy(() => import('./ModalEst'));
 
 const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaSelect, jugadores, setModal, user }) {
 	const [isOpen, setIsOpen] = useState(false);
+	const [jugadoresFiltrados, setJugadoresFiltrados] = useState([]);
 	const [jugadorDatos, setJugadorDatos] = useState([]);
-	const [datosCancha, setDatosCancha] = useState([]);
 	const [selectedCategoria, setSelectedCategoria] = useState(categoriaSelect || 'Todas');
 
 	useEffect(() => {
 		axios
-			.get(`http://localhost:3001/canchas?idCancha=${torneo.cancha}`)
-			.then((response) => setDatosCancha(response.data[0]))
+			.get(`http://localhost:3001/jugadoresFiltrados/${torneo.id}`)
+			.then((response) => setJugadoresFiltrados(response.data))
 			.catch((error) => console.error(error));
 	}, []);
 
@@ -25,64 +25,10 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 		setIsOpen(true);
 	}
 
-	const jugadoresFiltrados = torneo.categorias.map((categoria) => {
-		const nombreCategoria = categoria.nombre;
-		const jugadoresCategoria = jugadores
-			.filter((jugador) => jugador.torneo === torneo.id && jugador.categoria === nombreCategoria)
-			.map((jugador) => {
-				if (jugador.scores && datosCancha) {
-					const scoreNeto = jugador.categoria.toLowerCase().includes('gross') || jugador.categoria.toLowerCase().includes('scratch') ? jugador.totalScore - datosCancha.parCancha : jugador.totalScore - jugador.handicap * torneo.rondas - datosCancha.parCancha;
-					return {
-						...jugador,
-						scoreNeto
-					};
-				} else {
-					return { ...jugador };
-				}
-			})
-			.filter((jugador) => jugador.scoreNeto !== null)
-			.sort((a, b) => {
-				if (torneo.rondas !== 1) return a.scoreNeto - b.scoreNeto;
-				else {
-					// 1) score
-					if (a.scoreNeto !== b.scoreNeto) return a.scoreNeto - b.scoreNeto;
-					// 2) vuelta
-					const aVuelta = a.scores?.['ronda1_vuelta'] ?? Infinity;
-					const bVuelta = b.scores?.['ronda1_vuelta'] ?? Infinity;
-					if (aVuelta !== bVuelta) return aVuelta - bVuelta;
-					// 3) 3 últimos hoyos
-					const hoyosTotales = datosCancha?.cant_hoyos ?? 18;
-					const ultimos3 = [hoyosTotales - 2, hoyosTotales - 1, hoyosTotales];
-					const sumaA = ultimos3.reduce((acc, h) => acc + (a.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
-					const sumaB = ultimos3.reduce((acc, h) => acc + (b.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
-					return sumaA - sumaB;
-				}
-			});
-
-		return { categoria, jugadoresCategoria };
-	});
-
 	const exportToExcel = () => {
 		const workbook = XLSX.utils.book_new();
 
 		jugadoresFiltrados.forEach(({ categoria, jugadoresCategoria }) => {
-			jugadoresCategoria.sort((a, b) => {
-				if (torneo.rondas !== 1) return a.scoreNeto - b.scoreNeto;
-				else {
-					// 1) score
-					if (a.scoreNeto !== b.scoreNeto) return a.scoreNeto - b.scoreNeto;
-					// 2) vuelta
-					const aVuelta = a.scores?.['ronda1_vuelta'] ?? Infinity;
-					const bVuelta = b.scores?.['ronda1_vuelta'] ?? Infinity;
-					if (aVuelta !== bVuelta) return aVuelta - bVuelta;
-					// 3) 3 últimos hoyos
-					const hoyosTotales = datosCancha?.cant_hoyos ?? 18;
-					const ultimos3 = [hoyosTotales - 2, hoyosTotales - 1, hoyosTotales];
-					const sumaA = ultimos3.reduce((acc, h) => acc + (a.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
-					const sumaB = ultimos3.reduce((acc, h) => acc + (b.scores?.[`ronda1_hoyo${h}`] ?? 0), 0);
-					return sumaA - sumaB;
-				}
-			});
 			const data = jugadoresCategoria.map((jugador, index) => {
 				if (torneo.rondas === 1) {
 					return {
@@ -140,6 +86,11 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 		<div className='modal'>
 			<div className='modal_cont'>
 				<div className='modal_title'>
+					{user && (
+						<IconButton onClick={exportToExcel} title='Exportar a Excel'>
+							<PiMicrosoftExcelLogoFill fill='green' fontSize='30' />
+						</IconButton>
+					)}
 					<h3>{torneo.nombre}</h3>
 					<select value={selectedCategoria} onChange={(e) => setSelectedCategoria(e.target.value)}>
 						<option value='Todas'>Todas las categorías</option>
@@ -149,11 +100,6 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 							</option>
 						))}
 					</select>
-					{user && (
-						<IconButton onClick={exportToExcel} title='Exportar a Excel'>
-							<PiMicrosoftExcelLogoFill fill='green' fontSize='30' />
-						</IconButton>
-					)}
 				</div>
 				{jugadoresFiltrados
 					.filter(({ categoria }) => selectedCategoria === 'Todas' || categoria.nombre === selectedCategoria)
@@ -208,7 +154,7 @@ const EstadisticasTorneo = memo(function EstadisticasTorneo({ torneo, categoriaS
 					<IoCloseCircleSharp fontSize='40' />
 				</IconButton>
 			</div>
-			{isOpen && <ModalEst torneo={torneo} jugadorDatos={jugadorDatos} canchas={datosCancha} setIsOpen={setIsOpen} />}
+			{isOpen && <ModalEst torneo={torneo} jugadorDatos={jugadorDatos} setIsOpen={setIsOpen} />}
 		</div>
 	);
 });

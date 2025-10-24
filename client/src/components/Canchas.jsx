@@ -3,24 +3,19 @@ import { FaRegTrashCan } from 'react-icons/fa6';
 import { FaPenFancy } from 'react-icons/fa6';
 import axios from 'axios';
 
-function Canchas({ canchas, setCanchas, club }) {
+function Canchas({ club }) {
+	const [canchas, setCanchas] = useState([]);
 	const [isOpenCanchas, setModalCanchas] = useState(false);
-	const [golpes, setGolpes] = useState({});
 	const [isEditModalOpen, setEditModalOpen] = useState(false);
 	const [canchaToEdit, setCanchaToEdit] = useState(null);
 	const [editHoyos, setEditHoyos] = useState({});
 
 	useEffect(() => {
-		async function fetchGolpes() {
-			try {
-				const res = await axios.get('http://localhost:3001/golpes');
-				setGolpes(res.data);
-			} catch (error) {
-				console.error('Error al obtener golpes', error);
-			}
-		}
-		fetchGolpes();
-	}, [canchas, club.id]);
+		axios
+			.get(`http://localhost:3001/canchas?idClub=${club.id}`)
+			.then((response) => setCanchas(response.data))
+			.catch((error) => console.error(error));
+	}, [club.id]);
 
 	async function addHoyos(nuevosHoyos, canchaId) {
 		try {
@@ -30,7 +25,7 @@ function Canchas({ canchas, setCanchas, club }) {
 				parCancha: parCancha
 			});
 			await axios
-				.get('http://localhost:3001/canchas')
+				.get(`http://localhost:3001/canchas?idClub=${club.id}`)
 				.then((response) => setCanchas(response.data))
 				.catch((error) => console.error(error));
 		} catch (error) {
@@ -40,9 +35,9 @@ function Canchas({ canchas, setCanchas, club }) {
 	}
 
 	const formCancha = (cancha) => {
-		const hoyo = [];
+		const hoyos = [];
 		for (let i = 1; i <= cancha.cant_hoyos; i++) {
-			hoyo.push(
+			hoyos.push(
 				<div key={i}>
 					<span>Hoyo {i}:</span>
 					<span>par:</span>
@@ -81,7 +76,7 @@ function Canchas({ canchas, setCanchas, club }) {
 					await addHoyos(datosHoyos, cancha.id);
 				}}
 			>
-				{hoyo}
+				{hoyos}
 				<br />
 				<button type='submit'>Cargar Hoyos</button>
 			</form>
@@ -98,7 +93,9 @@ function Canchas({ canchas, setCanchas, club }) {
 		<div className='canchas'>
 			<h3 style={{ textAlign: 'center', fontStyle: 'italic' }}>{club.nombre}</h3>
 			<h2>DATOS DE TUS CANCHAS</h2>
-			{canchas.filter((cancha) => cancha.clubVinculo === club.id).length === 0 && <h3>No hay canchas registradas...</h3>}
+
+			{canchas.length === 0 && <h3>No hay canchas registradas...</h3>}
+
 			<div>
 				{!isOpenCanchas ? (
 					<button onClick={() => setModalCanchas(!isOpenCanchas)}>Agregar Nueva Cancha</button>
@@ -112,7 +109,7 @@ function Canchas({ canchas, setCanchas, club }) {
 							try {
 								await axios.post('http://localhost:3001/canchas', { nombre, cant_hoyos, clubVinculo });
 								await axios
-									.get('http://localhost:3001/canchas')
+									.get(`http://localhost:3001/canchas?idClub=${club.id}`)
 									.then((response) => setCanchas(response.data))
 									.catch((error) => console.error(error));
 								e.target.reset();
@@ -129,108 +126,83 @@ function Canchas({ canchas, setCanchas, club }) {
 					</form>
 				)}
 			</div>
-			{canchas
-				.filter((cancha) => cancha.clubVinculo === club.id)
-				.map((cancha) => (
-					<div key={cancha.id}>
-						{!cancha.hoyos ? (
-							<div>
-								<span>Agrega los datos de cancha: {cancha.nombre}</span>
-								<div className='formCancha'>{formCancha(cancha)}</div>
+			{canchas.map((cancha) => (
+				<div key={cancha.id}>
+					{!cancha.hoyos ? (
+						<div>
+							<span>Agrega los datos de cancha: {cancha.nombre}</span>
+							<div className='formCancha'>{formCancha(cancha)}</div>
+						</div>
+					) : (
+						<div className='datos_cancha'>
+							<div className='table_container'>
+								<table>
+									<caption>
+										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', justifyContent: 'center' }}>
+											<span>{cancha.nombre.toUpperCase()}</span>
+											<FaRegTrashCan
+												size={17}
+												className='pointer'
+												title='Eliminar cancha'
+												onClick={async () => {
+													if (!window.confirm(`¿Seguro que deseas eliminar cancha ${cancha.nombre}?`)) return;
+													try {
+														await axios.delete(`http://localhost:3001/canchas/${cancha.id}`);
+														await axios
+															.get(`http://localhost:3001/canchas?idClub=${club.id}`)
+															.then((response) => setCanchas(response.data))
+															.catch((error) => console.error(error));
+														alert('Cancha eliminada correctamente!');
+													} catch (error) {
+														alert('Error al eliminar cancha');
+														console.error(error);
+													}
+												}}
+											/>
+											<FaPenFancy
+												size={17}
+												className='pointer'
+												title='Editar datos de cancha'
+												onClick={() => {
+													handleEditClick(cancha);
+												}}
+											/>
+										</div>
+									</caption>
+									<thead>
+										<tr>
+											<th></th>
+											{Object.keys(cancha.hoyos).map((e, index) => (
+												<th>H {index + 1}</th>
+											))}
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<th>Par</th>
+											{Object.values(cancha.hoyos).map((hoyo) => (
+												<td key={hoyo}>{hoyo.par}</td>
+											))}
+										</tr>
+										<tr>
+											<th>Distancia</th>
+											{Object.values(cancha.hoyos).map((hoyo) => (
+												<td key={hoyo}>{hoyo.distancia}</td>
+											))}
+										</tr>
+										<tr>
+											<th>Dificultad</th>
+											{Object.values(cancha.hoyos).map((hoyo) => (
+												<td key={hoyo}>{hoyo.dificultad || '-'}</td>
+											))}
+										</tr>
+									</tbody>
+								</table>
 							</div>
-						) : (
-							<div className='datos_cancha'>
-								<div className='table_container'>
-									<table>
-										<caption>
-											<div style={{ display: 'flex', gap: '15px', alignItems: 'center', justifyContent: 'center' }}>
-												<span>{cancha.nombre.toUpperCase()}</span>
-												<FaRegTrashCan
-													size={17}
-													className='pointer'
-													title='Eliminar cancha'
-													onClick={async () => {
-														if (!window.confirm(`¿Seguro que deseas eliminar cancha ${cancha.nombre}?`)) return;
-														try {
-															await axios.delete(`http://localhost:3001/canchas/${cancha.id}`);
-															await axios
-																.get('http://localhost:3001/canchas')
-																.then((response) => setCanchas(response.data))
-																.catch((error) => console.error(error));
-															alert('Cancha eliminada correctamente!');
-														} catch (error) {
-															alert('Error al eliminar cancha');
-															console.error(error);
-														}
-													}}
-												/>
-												<FaPenFancy
-													size={17}
-													className='pointer'
-													title='Editar datos de cancha'
-													onClick={() => {
-														handleEditClick(cancha);
-													}}
-												/>
-											</div>
-										</caption>
-										<thead>
-											<tr>
-												<th></th>
-												<th>Distancia</th>
-												<th>Dificultad</th>
-												<th>Par</th>
-												<th>Par Promedio</th>
-												<th>Águila</th>
-												<th>Birdie</th>
-												<th>Par</th>
-												<th>Bogey</th>
-												<th>Doble Bogey</th>
-											</tr>
-										</thead>
-										<tbody>
-											{Object.keys(cancha.hoyos)
-												.sort((a, b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]))
-												.map((hoyo) => {
-													const hoyoGolpes = golpes[cancha.id]?.[hoyo] || [];
-													const totalGolpes = hoyoGolpes.length;
-													const par = cancha.hoyos[hoyo].par;
-													const promedioGolpes = totalGolpes > 0 ? (hoyoGolpes.reduce((acc, golpe) => acc + Number(golpe), 0) / totalGolpes).toFixed(2) : '...';
-
-													const parCount = hoyoGolpes.filter((golpe) => Number(golpe) === par).length;
-													const aguilaCount = hoyoGolpes.filter((golpe) => Number(golpe) === par - 2).length;
-													const birdieCount = hoyoGolpes.filter((golpe) => Number(golpe) === par - 1).length;
-													const bogeyCount = hoyoGolpes.filter((golpe) => Number(golpe) === par + 1).length;
-													const dobleBogeyCount = hoyoGolpes.filter((golpe) => Number(golpe) === par + 2).length;
-
-													const parPercentage = totalGolpes > 0 ? ((parCount / totalGolpes) * 100).toFixed(2) : '...';
-													const aguilaPercentage = totalGolpes > 0 ? ((aguilaCount / totalGolpes) * 100).toFixed(2) : '...';
-													const birdiePercentage = totalGolpes > 0 ? ((birdieCount / totalGolpes) * 100).toFixed(2) : '...';
-													const bogeyPercentage = totalGolpes > 0 ? ((bogeyCount / totalGolpes) * 100).toFixed(2) : '...';
-													const dobleBogeyPercentage = totalGolpes > 0 ? ((dobleBogeyCount / totalGolpes) * 100).toFixed(2) : '...';
-
-													return (
-														<tr key={hoyo}>
-															<th>Hoyo {hoyo.split('_')[1]}</th>
-															<td>{cancha.hoyos[hoyo].distancia} yd</td>
-															<td>{cancha.hoyos[hoyo].dificultad}</td>
-															<td>{cancha.hoyos[hoyo].par}</td>
-															<td>{promedioGolpes}</td>
-															<td>{aguilaPercentage} %</td>
-															<td>{birdiePercentage} %</td>
-															<td>{parPercentage} %</td>
-															<td>{bogeyPercentage} %</td>
-															<td>{dobleBogeyPercentage} %</td>
-														</tr>
-													);
-												})}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						)}
-					</div>
-				))}
+						</div>
+					)}
+				</div>
+			))}
 
 			{isEditModalOpen && canchaToEdit && (
 				<div className='modal_edit_cancha'>
@@ -244,7 +216,7 @@ function Canchas({ canchas, setCanchas, club }) {
 										hoyos: editHoyos,
 										parCancha: Object.values(editHoyos).reduce((acc, hoyo) => acc + Number(hoyo.par), 0)
 									});
-									const response = await axios.get('http://localhost:3001/canchas');
+									const response = await axios.get(`http://localhost:3001/canchas?idClub=${club.id}`);
 									setCanchas(response.data);
 									alert('Cancha actualizada!');
 									setEditModalOpen(false);

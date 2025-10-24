@@ -2,10 +2,15 @@ const db = require('../db.js');
 
 const getCanchas = (req, res) => {
 	let canchasSql = 'SELECT * FROM canchas';
+
 	if (req.query.idCancha) {
 		const { idCancha } = req.query;
 		canchasSql += ` WHERE id = ${idCancha}`;
+	} else if (req.query.idClub) {
+		const { idClub } = req.query;
+		canchasSql += ` WHERE clubVinculo = ${idClub}`;
 	}
+
 	db.query(canchasSql, (err, results) => {
 		if (err) return res.status(500).json({ error: err.message });
 		res.json(results);

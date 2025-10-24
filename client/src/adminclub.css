@@ -310,6 +310,7 @@
 }
 
 .jugadores_torneo {
+	width: 80vw;
 	margin-bottom: 25px;
 	padding: 20px;
 	border-radius: 12px;
@@ -321,13 +322,10 @@
 	margin-bottom: 20px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	position: relative;
+	justify-content: space-between;
 }
 
 .jugadores_torneo_header select {
-	position: absolute;
-	left: 0;
 	background-color: #dcffc7;
 	border: none;
 	padding: 5px;
@@ -337,8 +335,6 @@
 }
 
 .jugadores_torneo_header button {
-	position: absolute;
-	right: 0;
 	background-color: red;
 	color: white;
 	border: none;
@@ -349,21 +345,18 @@
 .jugadores_torneo_header span {
 	font-size: 22px;
 	font-weight: bold;
-	margin: 0 220px;
+	margin: 0 20px;
 }
 
 table {
+	width: 100%;
 	margin-bottom: 20px;
 	border-collapse: collapse;
-	height: fit-content;
-	width: calc(100vw - 480px);
 	font-size: 14px;
 }
 
 .jugadores_torneo table caption label {
-	color: #2469cf;
-	position: absolute;
-	right: 10px;
+	color: #0b52bb;
 }
 
 caption {
@@ -426,8 +419,8 @@ th {
 	width: 100%;
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	position: relative;
+	justify-content: space-between;
+	/* position: relative; */
 }
 
 .modal_cont .modal_title h3 {
@@ -435,8 +428,8 @@ th {
 }
 
 .modal_cont .modal_title select {
-	position: absolute;
-	left: 0;
+	/* position: absolute;
+	left: 0; */
 	background: none;
 	border: none;
 	padding: 5px;
@@ -445,10 +438,10 @@ th {
 	cursor: pointer;
 }
 
-.modal_cont .modal_title button {
+/* .modal_cont .modal_title button {
 	position: absolute;
 	right: 0;
-}
+} */
 
 .modal_cont h3 {
 	font-size: 22px;
@@ -596,22 +589,28 @@ th {
 }
 
 .modal_edit_cont form {
-	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 20px;
+	/* margin-right: 15px; */
+	margin-top: 10px;
 }
 
 .modal_edit_cont form div {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 10px;
-	margin-right: 15px;
-	margin-top: 10px;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 20px;
 }
 
 .modal_edit_cont input[type="number"] {
 	width: 40px;
 }
 
-@media (max-width: 885px) {
+@media (max-width: 1060px) {
 	.admin_club h3 {
 		font-size: 15px;
 	}
@@ -625,8 +624,7 @@ th {
 	}
 
 	.torneos_view {
-		width: 80vw;
-		margin: 0;
+		width: calc(100% - 75px);
 		margin-left: 20px;
 		display: block;
 	}
@@ -677,22 +675,23 @@ th {
 		margin-bottom: 15px;
 	}
 
-	.jugadores_admin form {
-		width: 80vw;
-	}
-
 	.form_nuevojug {
-		margin: 15px 0;
-		padding: 5px;
+		width: 300px;
+		margin: 25px 0;
+		padding: 10px;
 		display: flex;
 		flex-direction: column;
+		gap: 10px;
 		border-radius: 12px;
 		box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.15);
 	}
 
 	.form_nuevojug div {
+		width: 100%;
 		display: flex;
 		flex-direction: column;
+		justify-content: start;
+		gap: 10px;
 		margin: 0;
 	}
 
@@ -703,5 +702,11 @@ th {
 	.form_nuevojug input,
 	.form_nuevojug select {
 		margin-right: 0;
+		width: 100% !important;
+		box-sizing: border-box;
+	}
+
+	.jugadores_torneo {
+		width: 90vw;
 	}
 }

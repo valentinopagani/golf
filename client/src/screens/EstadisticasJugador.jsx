@@ -73,7 +73,7 @@ function EstadisticasJugador() {
 						<h3>
 							HISTORIAL DE {jugadorPase.dni} - {jugadorPase.nombre.toUpperCase()}:
 						</h3>
-						<Historial jugador={jugadorPase} />
+						<Historial dni={jugadorPase.dni} />
 						<Button onClick={() => setIsOpen(false)} variant='contained' size='small' color='error'>
 							Cerrar
 						</Button>

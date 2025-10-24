@@ -61,14 +61,14 @@ function AdminView({ user }) {
 
 	return (
 		<>
-			{user.email === process.env.REACT_APP_EMAIL_ADMIN ? (
+			{user?.email === process.env.REACT_APP_EMAIL_ADMIN ? (
 				// VISTA ADMIN GRAL
 				<div className='admin_view'>
 					<button onClick={() => signOut(auth)} className='logout'>
 						cerrar sesion
 					</button>
 
-					<h2>Bienvenido, accediste como Administrador General!!</h2>
+					<h2>¡Bienvenido, accediste como Administrador General!</h2>
 
 					<h2>Registrar un nuevo usuario:</h2>
 					<form

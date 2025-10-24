@@ -71,15 +71,15 @@ function ModalEdit({ jugadorDatos, setJugadoresTorneo, idsTorneosAdmin, setIsOpe
 			<div className='modal_edit_cont'>
 				<h2>{jugadorDatos.dni + ' - ' + jugadorDatos.nombre}</h2>
 				<form onSubmit={handleSubmit}>
-					{Object.entries(scores)
-						.filter(([key]) => key.includes('hoyo'))
-						.map(([key, value]) => (
-							<div key={key}>
-								<label>{'R' + key[5] + '.Hoyo ' + key.substring(11)}: </label>
-								<input type='number' value={value} onChange={(e) => handleInputChange(e, key)} placeholder={key} />
-							</div>
-						))}
-					<br />
+					<div>
+						{Object.entries(scores)
+							.filter(([key]) => key.includes('hoyo'))
+							.map(([key, value]) => (
+								<label key={key}>
+									{'R' + key[5] + '.Hoyo ' + key.substring(11)}: <input type='number' value={value} onChange={(e) => handleInputChange(e, key)} placeholder={key} />
+								</label>
+							))}
+					</div>
 					<Stack direction='row'>
 						<Button variant='contained' size='small' onClick={() => setIsOpen(false)}>
 							cancelar

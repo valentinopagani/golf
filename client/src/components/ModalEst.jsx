@@ -1,4 +1,4 @@
-import { lazy, useState, useMemo } from 'react';
+import { lazy, useState, useMemo, useEffect } from 'react';
 import { Box, Button, IconButton } from '@mui/material';
 import { FaRegAddressCard } from 'react-icons/fa6';
 import { FcStatistics } from 'react-icons/fc';
@@ -6,13 +6,22 @@ import { FaHistory } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { IoCloseCircleSharp } from 'react-icons/io5';
+import axios from 'axios';
 
 const Historial = lazy(() => import('./Historial'));
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-function ModalEst({ torneo, jugadorDatos, canchas, setIsOpen, condicion }) {
-	const datosCancha = Array.isArray(canchas) ? canchas.find((cancha) => cancha.id === torneo.cancha) : canchas;
+function ModalEst({ torneo, jugadorDatos, setIsOpen, condicion }) {
+	const [datosCancha, setDatosCancha] = useState([]);
+
+	useEffect(() => {
+		axios
+			.get(`http://localhost:3001/canchas?idCancha=${torneo.cancha}`)
+			.then((response) => setDatosCancha(response.data[0]))
+			.catch((error) => console.error(error));
+	}, []);
+
 	const scores = useMemo(() => jugadorDatos.scores || {}, [jugadorDatos.scores]);
 	const numRondas = torneo.rondas;
 	const numHoyos = datosCancha ? datosCancha.cant_hoyos : 18;
@@ -262,7 +271,7 @@ function ModalEst({ torneo, jugadorDatos, canchas, setIsOpen, condicion }) {
 					</div>
 				)}
 
-				{tabs === 3 && <Historial jugador={jugadorDatos} />}
+				{tabs === 3 && <Historial dni={jugadorDatos.dni} />}
 
 				<IconButton onClick={() => setIsOpen(false)} size='medium' sx={{ position: 'absolute', top: 5, right: 10, color: 'white' }}>
 					<IoCloseCircleSharp fontSize='40' />

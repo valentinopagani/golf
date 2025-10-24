@@ -1,6 +1,6 @@
 const db = require('../db.js');
 
-const getCategoryStats = (req, res) => {
+const getInscriptosStats = (req, res) => {
 	let { club, fechaMin, fechaMax } = req.query;
 	club = JSON.parse(decodeURIComponent(club));
 
@@ -31,10 +31,10 @@ const getCategoryStats = (req, res) => {
 
 	db.query(sql, params, (err, results) => {
 		if (err) return res.status(500).json({ error: err.message });
-		const labels = results.map((r) => `${r.nombre} - ${r.fech_ini_inv}`);
+		const labels = results.map((r) => `${r.nombre} ${r.fech_ini}`);
 		const values = results.map((r) => r.inscriptosUnicos);
 		res.json({ labels, values });
 	});
 };
 
-module.exports = { getCategoryStats };
+module.exports = { getInscriptosStats };

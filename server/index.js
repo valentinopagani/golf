@@ -16,7 +16,8 @@ const canchas = require('./routes/canchas');
 const jugadores = require('./routes/jugadores');
 const golpes = require('./routes/golpes');
 const inscriptos = require('./routes/inscriptos');
-const categoryStats = require('./routes/categoryStats');
+const estadisticas = require('./routes/estadisticas');
+const jugadoresFiltrados = require('./routes/jugadoresFiltrados');
 
 app.use('/torneos', torneos);
 app.use('/categorias_torneo', categoriasTorneo);
@@ -26,7 +27,8 @@ app.use('/canchas', canchas);
 app.use('/jugadores', jugadores);
 app.use('/golpes', golpes);
 app.use('/inscriptos', inscriptos);
-app.use(`/estadisticas`, categoryStats);
+app.use(`/estadisticas`, estadisticas);
+app.use('/jugadoresFiltrados', jugadoresFiltrados);
 
 // MERCADO PAGO
 const client = new MercadoPagoConfig({ accessToken: process.env.accessToken });
