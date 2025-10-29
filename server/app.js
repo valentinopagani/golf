@@ -5,6 +5,8 @@ require('dotenv').config();
 const { default: MercadoPagoConfig, Preference } = require('mercadopago');
 const axios = require('axios');
 
+const PORT = process.env.PORT || 3001;
+
 app.use(cors());
 app.use(express.json());
 
@@ -108,6 +110,6 @@ app.post('/webhook', async (req, res) => {
 	}
 });
 
-app.listen(3001, () => {
-	console.log('corriendo en puerto 3001');
+app.listen(PORT, () => {
+	console.log('corriendo en puerto ' + PORT);
 });

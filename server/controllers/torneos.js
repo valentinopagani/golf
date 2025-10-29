@@ -5,18 +5,14 @@ const getTorneos = (req, res) => {
 	let torneosSql = 'SELECT * FROM torneos';
 	const categoriasSql = 'SELECT * FROM categorias_torneo';
 
-	const actualDate = new Date();
-	let twoMonthsAgo = subMonths(actualDate, 2);
-	twoMonthsAgo = twoMonthsAgo.toISOString().slice(0, 10);
-
 	if (req.query.tipo) {
 		const { tipo } = req.query;
 		if (tipo === 'proximos') {
 			torneosSql += " WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') >= CURDATE();";
 		} else if (tipo === 'dosmeses') {
-			torneosSql += ` WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') >= ${twoMonthsAgo} AND finalizado = 1`;
-		} else if (tipo === 'dosmesesadmin') {
-			torneosSql += ` WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') >= ${twoMonthsAgo}`;
+			torneosSql += ` WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH) AND finalizado = 1`;
+		} else if (tipo === 'antiguos') {
+			torneosSql += ` WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') < CURDATE()`;
 		} else if (tipo === 'inscripciones') {
 			torneosSql += " WHERE STR_TO_DATE(fech_ini, '%d/%m/%Y') >= CURDATE() AND finalizado=0 AND valor IS NOT NULL";
 		} else if (tipo === 'inscripcionesadmin') {
