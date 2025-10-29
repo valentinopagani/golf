@@ -37,7 +37,7 @@ function TorneosAdminClubs({ club, user }) {
 			.catch((error) => console.error(error));
 
 		axios
-			.get('http://localhost:3001/torneos?tipo=dosmesesadmin')
+			.get('http://localhost:3001/torneos?tipo=antiguos')
 			.then((response) => setTorneosAntiguos(response.data))
 			.catch((error) => console.error(error));
 
@@ -290,7 +290,7 @@ function TorneosAdminClubs({ club, user }) {
 							.map((torneo) => (
 								<div key={torneo.id} className='torneo_adm'>
 									<TorneosAdmin torneo={torneo} club={club} />
-									{!torneo.finalizado && (
+									{torneo.finalizado === 0 && (
 										<IconButton
 											className='edit_bt'
 											onClick={() => {
@@ -308,7 +308,7 @@ function TorneosAdminClubs({ club, user }) {
 
 			<div className='torneos_all'>
 				{torneosAntiguos.filter((torneo) => torneo.clubVinculo === club.id).length === 0 ? (
-					<h3>Agrega un nuevo torneo para visualizarlo aquí...</h3>
+					<h3>Los torneos pasados se visualizarán aquí...</h3>
 				) : (
 					<div id='torneos'>
 						<h3>Todos los Torneos:</h3>
@@ -327,7 +327,7 @@ function TorneosAdminClubs({ club, user }) {
 									.map((torneo) => (
 										<div key={torneo.id} onDoubleClick={() => handleTorneoClick(torneo)} className='torneo_adm'>
 											<TorneosAdmin torneo={torneo} club={club} />
-											{!torneo.finalizado && (
+											{torneo.finalizado === 0 && (
 												<IconButton
 													className='edit_bt'
 													onClick={() => {
@@ -398,7 +398,7 @@ function TorneosAdminClubs({ club, user }) {
 										.then((response) => setTorneosProximos(response.data))
 										.catch((error) => console.error(error));
 									await axios
-										.get('http://localhost:3001/torneos?tipo=dosmesesadmin')
+										.get('http://localhost:3001/torneos?tipo=antiguos')
 										.then((response) => setTorneosAntiguos(response.data))
 										.catch((error) => console.error(error));
 									document.getElementById('form_edit_torneo').reset();

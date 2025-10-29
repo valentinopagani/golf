@@ -85,8 +85,8 @@ function AdminView({ user }) {
 						}}
 					>
 						<input type='text' id='nombre' placeholder='Nombre del usuario:' />
-						<input type='email' id='email' placeholder='Email del usuario:' />
-						<input type='password' id='password' placeholder='Contraseña:' />
+						<input type='text' id='email' placeholder='Email del usuario:' />
+						<input type='text' id='password' placeholder='Contraseña:' />
 						<button type='submit'>Registrar Usuario</button>
 					</form>
 
@@ -128,9 +128,10 @@ function AdminView({ user }) {
 						<input type='email' placeholder='Email:' id='email' />
 						<label htmlFor='usuarioVinculado'>vincular con un usuario:</label>
 						<select id='usuarioVinculado'>
-							<option value=''>ninguno</option>
 							{usuarios.map((usuario) => (
-								<option value={usuario.id}>{usuario.id}</option>
+								<option key={usuario.id} value={usuario.id}>
+									{usuario.id}
+								</option>
 							))}
 						</select>
 						<button type='submit'>Agregar Club</button>

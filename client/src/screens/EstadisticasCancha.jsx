@@ -19,6 +19,8 @@ function EstadisticasCancha() {
 			});
 	}, []);
 
+	console.log(datos);
+
 	return (
 		<div className='body_home'>
 			<div className='title_banner'>
